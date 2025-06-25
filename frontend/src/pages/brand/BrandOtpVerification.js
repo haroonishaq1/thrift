@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
 import { authAPI } from '../../services/api';
-import '../../styles/OtpVerification.css';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import '../../styles/ForgotPasswordOtpVerification.css';
 
 const BrandOtpVerification = () => {
   const navigate = useNavigate();
@@ -13,8 +9,12 @@ const BrandOtpVerification = () => {
   const email = location.state?.email;
   const brandName = location.state?.brandName;
   
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
-  const [canResend, setCanResend] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Redirect if no email provided
   useEffect(() => {
@@ -23,196 +23,172 @@ const BrandOtpVerification = () => {
     }
   }, [email, navigate]);
 
-  // Countdown timer
+  // Resend cooldown timer
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
       return () => clearTimeout(timer);
-    } else {
-      setCanResend(true);
     }
-  }, [timeLeft]);
+  }, [resendCooldown]);
 
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return; // Only allow digits
+    
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    setError(''); // Clear error when user types
+    
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
   };
 
-  const validationSchema = Yup.object({
-    otp: Yup.string()
-      .matches(/^\d{6}$/, 'OTP must be exactly 6 digits')
-      .required('Please enter the OTP')
-  });
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
+    const otpCode = otp.join('');
+    
+    if (otpCode.length !== 6) {
+      setError('Please enter the complete 6-digit code');
+      setIsLoading(false);
+      return;
+    }
+    
     try {
-      console.log('Verifying Brand OTP:', values.otp, 'for email:', email);
+      console.log('Verifying Brand OTP:', otpCode, 'for email:', email);
       
-      const response = await authAPI.brandVerifyOTP(email, values.otp);
+      const response = await authAPI.brandVerifyOTP(email, otpCode);
       console.log('Brand OTP verification response:', response);
 
       if (response.success) {
-        // Navigate to success page or login page
-        navigate('/brand/login', { 
-          state: { 
-            otpVerified: true,
-            registrationComplete: true,
-            email: email,
-            brandName: brandName,
-            message: 'Brand registration completed! Please wait for admin approval before logging in.'
-          }
-        });
-      } else {
-        setFieldError('otp', response.message || 'Invalid OTP. Please try again.');
+        setSuccess('Verification successful! Redirecting...');
+        
+        // Navigate to login page
+        setTimeout(() => {
+          navigate('/brand/login', { 
+            state: { 
+              otpVerified: true,
+              registrationComplete: true,
+              email: email,
+              brandName: brandName,
+              message: 'Brand registration completed! Please wait for admin approval before logging in.'
+            }
+          });
+        }, 1500);
       }
     } catch (error) {
       console.error('Brand OTP verification error:', error);
-      setFieldError('otp', error.message || 'Verification failed. Please try again.');
+      setError(error.message || 'Invalid or expired code. Please try again.');
     } finally {
-      setSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const handleResendOTP = async () => {
+  const handleResendOtp = async () => {
+    setIsResending(true);
+    setError('');
+    
     try {
       const response = await authAPI.brandResendOTP(email);
       
       if (response.success) {
-        alert('New verification code sent to your email!');
-        setTimeLeft(300); // Reset timer
-        setCanResend(false);
-      } else {
-        alert(response.message || 'Failed to resend OTP. Please try again.');
+        setSuccess('New verification code sent to your email!');
+        setResendCooldown(60); // 60 seconds cooldown
+        setOtp(['', '', '', '', '', '']); // Clear current OTP
+        
+        // Focus first input
+        const firstInput = document.getElementById('otp-0');
+        if (firstInput) firstInput.focus();
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
       }
     } catch (error) {
       console.error('Resend OTP error:', error);
-      alert('Failed to resend OTP. Please try again.');
+      setError(error.message || 'Failed to resend code. Please try again.');
+    } finally {
+      setIsResending(false);
     }
   };
 
   if (!email) {
-    return <div>Redirecting...</div>;
+    return null; // Will redirect in useEffect
   }
 
   return (
-    <div className="otp-page">
-      <Header />
-      <div className="otp-verification-container">
-        <div className="otp-form-wrapper">
-          <h1>THRIFT</h1>
-          <h2>Brand Email Verification</h2>
-          <p className="otp-instruction">
-            We've sent a 6-digit verification code to<br />
-            <strong>{email}</strong>
-          </p>
+    <div className="forgot-password-otp-container">
+      <div className="forgot-password-otp-form-wrapper">
+        <h1>THRIFT</h1>
+        <h2>Brand Email Verification</h2>
+        <p className="forgot-password-otp-description">
+          We've sent a 6-digit verification code to {email}
           {brandName && (
-            <p className="brand-name">
-              Brand: <strong>{brandName}</strong>
-            </p>
+            <>
+              <br />
+              <strong>Brand: {brandName}</strong>
+            </>
           )}
-
-          <Formik
-            initialValues={{ otp: '' }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
+        </p>
+        
+        {success && <div className="success-message">{success}</div>}
+        {error && <div className="error-message">{error}</div>}
+        
+        <form onSubmit={handleSubmit} className="forgot-password-otp-form">
+          <div className="otp-input-group">
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                id={`otp-${index}`}
+                type="text"
+                value={digit}
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                className="otp-input"
+                maxLength="1"
+                disabled={isLoading}
+                required
+              />
+            ))}
+          </div>
+          
+          <button 
+            type="submit" 
+            className="verify-button"
+            disabled={isLoading}
           >
-            {({ isSubmitting, values, setFieldValue }) => (
-              <Form className="otp-form">
-                <div className="otp-input-container">
-                  <Field name="otp">
-                    {({ field, meta }) => (
-                      <div>
-                        <div className="otp-inputs">
-                          {[0, 1, 2, 3, 4, 5].map((index) => (
-                            <input
-                              key={index}
-                              type="text"
-                              maxLength="1"
-                              className={`otp-digit ${meta.touched && meta.error ? 'error' : ''}`}
-                              value={values.otp[index] || ''}
-                              onChange={(e) => {
-                                const newValue = e.target.value;
-                                if (/^\d?$/.test(newValue)) {
-                                  const newOtp = values.otp.split('');
-                                  newOtp[index] = newValue;
-                                  setFieldValue('otp', newOtp.join(''));
-                                  
-                                  // Auto-focus next input
-                                  if (newValue && index < 5) {
-                                    const nextInput = e.target.parentNode.children[index + 1];
-                                    if (nextInput) nextInput.focus();
-                                  }
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                // Handle backspace
-                                if (e.key === 'Backspace' && !values.otp[index] && index > 0) {
-                                  const prevInput = e.target.parentNode.children[index - 1];
-                                  if (prevInput) prevInput.focus();
-                                }
-                              }}
-                              onPaste={(e) => {
-                                e.preventDefault();
-                                const pastedData = e.clipboardData.getData('text').slice(0, 6);
-                                if (/^\d{1,6}$/.test(pastedData)) {
-                                  setFieldValue('otp', pastedData);
-                                }
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <ErrorMessage name="otp" component="div" className="error-message" />
-                      </div>
-                    )}
-                  </Field>
-                </div>
-
-                <button 
-                  type="submit" 
-                  className="verify-button"
-                  disabled={isSubmitting || values.otp.length !== 6}
-                >
-                  {isSubmitting ? 'Verifying...' : 'Verify Code'}
-                </button>
-              </Form>
-            )}
-          </Formik>
-
-          <div className="otp-timer">
-            {timeLeft > 0 ? (
-              <p>Code expires in: <span className="timer">{formatTime(timeLeft)}</span></p>
-            ) : (
-              <p className="expired">Code has expired</p>
-            )}
-          </div>
-
-          <div className="resend-section">
-            {canResend ? (
-              <button 
-                className="resend-button" 
-                onClick={handleResendOTP}
-              >
-                Resend Code
-              </button>
-            ) : (
-              <p className="resend-info">
-                Didn't receive the code? You can resend in {formatTime(timeLeft)}
-              </p>
-            )}
-          </div>
-
-          <div className="back-to-registration">
-            <button 
-              className="back-button" 
-              onClick={() => navigate('/brand/register/step1')}
-            >
-              ← Back to Registration
-            </button>
-          </div>
+            {isLoading ? 'Verifying...' : 'Verify Code'}
+          </button>
+        </form>
+        
+        <div className="resend-section">
+          <p>Didn't receive the code?</p>
+          <button
+            type="button"
+            onClick={handleResendOtp}
+            disabled={isResending || resendCooldown > 0}
+            className="resend-button"
+          >
+            {isResending ? 'Sending...' : 
+             resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
+          </button>
+        </div>
+        
+        <div className="forgot-password-otp-footer">
+          <p><a href="/brand/register/step1">← Back to Registration</a></p>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
