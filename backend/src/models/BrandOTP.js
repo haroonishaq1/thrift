@@ -8,7 +8,8 @@ const CREATE_BRAND_OTP_TABLE = `
     otp_code VARCHAR(6) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     is_used BOOLEAN DEFAULT FALSE,
-    brand_data JSONB NOT NULL,
+    brand_data JSONB,
+    type VARCHAR(50) DEFAULT 'registration',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `;
@@ -27,17 +28,17 @@ const initializeBrandOTPTable = async () => {
 // Brand OTP model methods
 const BrandOTP = {
   // Create a new brand OTP
-  create: async (email, otpCode, expiresAt, brandData) => {
+  create: async (email, otpCode, expiresAt, brandData = null, type = 'registration') => {
     try {
       const query = `
-        INSERT INTO brand_otps (email, otp_code, expires_at, brand_data)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, email, otp_code, expires_at, created_at
+        INSERT INTO brand_otps (email, otp_code, expires_at, brand_data, type)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, email, otp_code, expires_at, type, created_at
       `;
-      const values = [email, otpCode, expiresAt, JSON.stringify(brandData)];
+      const values = [email, otpCode, expiresAt, brandData ? JSON.stringify(brandData) : null, type];
       const result = await pool.query(query, values);
       
-      console.log(`✅ Brand OTP created for: ${email}`);
+      console.log(`✅ Brand OTP created for: ${email} (type: ${type})`);
       return result.rows[0];
     } catch (error) {
       console.error('❌ Error creating brand OTP:', error.message);
@@ -45,16 +46,23 @@ const BrandOTP = {
     }
   },
 
-  // Find OTP by email and code
-  findByEmailAndCode: async (email, otpCode) => {
+  // Find OTP by email and code with type
+  findByEmailAndCode: async (email, otpCode, type = null) => {
     try {
-      const query = `
+      let query = `
         SELECT * FROM brand_otps 
         WHERE email = $1 AND otp_code = $2 AND is_used = FALSE
-        ORDER BY created_at DESC 
-        LIMIT 1
       `;
-      const result = await pool.query(query, [email, otpCode]);
+      const values = [email, otpCode];
+      
+      if (type) {
+        query += ` AND type = $3`;
+        values.push(type);
+      }
+      
+      query += ` ORDER BY created_at DESC LIMIT 1`;
+      
+      const result = await pool.query(query, values);
       return result.rows[0] || null;
     } catch (error) {
       console.error('❌ Error finding brand OTP:', error.message);
@@ -75,6 +83,26 @@ const BrandOTP = {
       return result.rows[0];
     } catch (error) {
       console.error('❌ Error marking brand OTP as used:', error.message);
+      throw error;
+    }
+  },
+
+  // Delete OTPs by email and type
+  deleteByEmail: async (email, type = null) => {
+    try {
+      let query = `DELETE FROM brand_otps WHERE email = $1`;
+      const values = [email];
+      
+      if (type) {
+        query += ` AND type = $2`;
+        values.push(type);
+      }
+      
+      const result = await pool.query(query, values);
+      console.log(`✅ Deleted ${result.rowCount} brand OTPs for: ${email} (type: ${type || 'all'})`);
+      return result.rowCount;
+    } catch (error) {
+      console.error('❌ Error deleting brand OTPs:', error.message);
       throw error;
     }
   },

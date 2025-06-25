@@ -6,6 +6,7 @@ const {
   getProfile,
   logout,
   forgotPassword,
+  verifyForgotPasswordOTP,
   resetPassword
 } = require('../controllers/brandAuthController');
 const { authenticateToken } = require('../middleware/auth');
@@ -16,6 +17,7 @@ router.post('/register', asyncHandler(register));
 router.post('/login', asyncHandler(login));
 router.post('/logout', asyncHandler(logout));
 router.post('/forgot-password', asyncHandler(forgotPassword));
+router.post('/forgot-password/verify-otp', asyncHandler(verifyForgotPasswordOTP));
 router.post('/reset-password', asyncHandler(resetPassword));
 
 // Protected routes

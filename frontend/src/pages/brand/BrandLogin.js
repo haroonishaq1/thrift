@@ -88,8 +88,8 @@ function BrandLogin() {
   };
   
   const handleForgotPassword = () => {
-    // Navigate to forgot password page or trigger a modal
-    console.log('Forgot password clicked');
+    // Navigate to brand forgot password page
+    navigate('/brand/forgot-password');
   };
   
   return (

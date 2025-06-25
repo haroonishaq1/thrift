@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs');
-const { generateToken, formatResponse, isValidEmail } = require('../utils/helpers');
+const { generateToken, formatResponse, isValidEmail, generateOTP, getOTPExpiry } = require('../utils/helpers');
+const { Brand } = require('../models/Brand');
+const { BrandOTP } = require('../models/BrandOTP');
+const { sendOTPEmail } = require('../utils/emailService');
 
 // Mock brand data storage (replace with actual database in production)
 let brands = [];
@@ -239,23 +242,105 @@ const logout = async (req, res) => {
 // Forgot Password (placeholder)
 const forgotPassword = async (req, res) => {
   try {
+    console.log('🔓 Brand forgot password request received');
     const { email } = req.body;
 
-    if (!email || !isValidEmail(email)) {
+    if (!email) {
+      return res.status(400).json(
+        formatResponse(false, 'Email is required')
+      );
+    }
+
+    if (!isValidEmail(email)) {
       return res.status(400).json(
         formatResponse(false, 'Please provide a valid email address')
       );
     }
 
-    // In a real implementation, you would send a password reset email
+    // Check if brand exists
+    const existingBrand = await Brand.findByEmail(email);
+    if (!existingBrand) {
+      return res.status(404).json(
+        formatResponse(false, 'Email is not registered with us')
+      );
+    }
+
+    // Generate OTP
+    const otpCode = generateOTP();
+    const expiresAt = getOTPExpiry();
+
+    // Delete any existing forgot password OTPs for this brand
+    await BrandOTP.deleteByEmail(email, 'forgot_password');
+
+    // Store OTP in database with type 'forgot_password'
+    await BrandOTP.create(email, otpCode, expiresAt, null, 'forgot_password');
+
+    // Send OTP email
+    await sendOTPEmail(email, otpCode, 'Brand Password Reset');
+
+    console.log('✅ Brand forgot password OTP sent successfully');
     return res.json(
-      formatResponse(true, 'Password reset email sent (feature not implemented in demo)')
+      formatResponse(true, 'Password reset code sent to your email')
     );
 
   } catch (error) {
-    console.error('❌ Forgot password error:', error);
+    console.error('❌ Brand forgot password error:', error);
     return res.status(500).json(
-      formatResponse(false, 'Failed to process password reset request')
+      formatResponse(false, 'Failed to send reset code. Please try again later.')
+    );
+  }
+};
+
+// Verify Forgot Password OTP
+const verifyForgotPasswordOTP = async (req, res) => {
+  try {
+    console.log('🔓 Verify brand forgot password OTP request received');
+    const { email, otpCode } = req.body;
+
+    if (!email || !otpCode) {
+      return res.status(400).json(
+        formatResponse(false, 'Email and OTP code are required')
+      );
+    }
+
+    // Find OTP record
+    const otpRecord = await BrandOTP.findByEmailAndCode(email, otpCode, 'forgot_password');
+    
+    if (!otpRecord) {
+      return res.status(400).json(
+        formatResponse(false, 'Invalid or expired reset code')
+      );
+    }
+
+    // Check if OTP is expired
+    if (new Date() > new Date(otpRecord.expires_at)) {
+      await BrandOTP.deleteByEmail(email, 'forgot_password');
+      return res.status(400).json(
+        formatResponse(false, 'Reset code has expired. Please request a new one.')
+      );
+    }
+
+    // Generate a temporary reset token
+    const resetToken = generateToken({ 
+      email, 
+      type: 'brand_password_reset',
+      timestamp: Date.now()
+    });
+
+    // Delete the OTP since it's been verified
+    await BrandOTP.deleteByEmail(email, 'forgot_password');
+
+    console.log('✅ Brand forgot password OTP verified successfully');
+    return res.json(
+      formatResponse(true, 'Reset code verified successfully', {
+        resetToken
+      })
+    );
+
+  } catch (error) {
+    console.error('❌ Verify brand forgot password OTP error:', error);
+    return res.status(500).json(
+      formatResponse(false, 'Verification failed. Please try again later.')
     );
   }
 };
@@ -263,13 +348,66 @@ const forgotPassword = async (req, res) => {
 // Reset Password (placeholder)
 const resetPassword = async (req, res) => {
   try {
+    console.log('🔓 Brand reset password request received');
+    const { email, resetToken, newPassword } = req.body;
+
+    if (!email || !resetToken || !newPassword) {
+      return res.status(400).json(
+        formatResponse(false, 'Email, reset token, and new password are required')
+      );
+    }
+
+    // Validate password strength
+    if (newPassword.length < 8) {
+      return res.status(400).json(
+        formatResponse(false, 'Password must be at least 8 characters long')
+      );
+    }
+
+    // Verify reset token
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+      
+      if (decoded.email !== email || decoded.type !== 'brand_password_reset') {
+        throw new Error('Invalid token');
+      }
+
+      // Check if token is too old (15 minutes)
+      const tokenAge = Date.now() - decoded.timestamp;
+      if (tokenAge > 15 * 60 * 1000) { // 15 minutes in milliseconds
+        throw new Error('Token expired');
+      }
+    } catch (tokenError) {
+      return res.status(400).json(
+        formatResponse(false, 'Invalid or expired reset token')
+      );
+    }
+
+    // Check if brand exists
+    const existingBrand = await Brand.findByEmail(email);
+    if (!existingBrand) {
+      return res.status(404).json(
+        formatResponse(false, 'Brand not found')
+      );
+    }
+
+    // Hash new password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update brand password
+    await Brand.updatePassword(email, hashedPassword);
+
+    console.log('✅ Brand password reset successful');
     return res.json(
-      formatResponse(true, 'Password reset successful (feature not implemented in demo)')
+      formatResponse(true, 'Password reset successful')
     );
+
   } catch (error) {
-    console.error('❌ Reset password error:', error);
+    console.error('❌ Brand reset password error:', error);
     return res.status(500).json(
-      formatResponse(false, 'Failed to reset password')
+      formatResponse(false, 'Failed to reset password. Please try again later.')
     );
   }
 };
@@ -280,5 +418,6 @@ module.exports = {
   getProfile,
   logout,
   forgotPassword,
+  verifyForgotPasswordOTP,
   resetPassword
 };

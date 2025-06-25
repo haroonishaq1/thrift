@@ -175,6 +175,30 @@ export const authAPI = {
       body: JSON.stringify({ email, resetToken, newPassword }),
     });
   },
+
+  // Brand forgot password - send reset code
+  brandForgotPassword: async (email) => {
+    return apiRequest('/brand-auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  // Verify brand forgot password OTP
+  verifyBrandForgotPasswordOTP: async (email, otpCode) => {
+    return apiRequest('/brand-auth/forgot-password/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, otpCode }),
+    });
+  },
+
+  // Brand reset password
+  brandResetPassword: async (email, resetToken, newPassword) => {
+    return apiRequest('/brand-auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, resetToken, newPassword }),
+    });
+  },
 };
 
 /**

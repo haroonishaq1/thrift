@@ -275,6 +275,29 @@ const Brand = {
     }
   },
 
+  // Update brand password
+  updatePassword: async (email, hashedPassword) => {
+    try {
+      const query = `
+        UPDATE brands 
+        SET password = $1, updated_at = CURRENT_TIMESTAMP 
+        WHERE email = $2
+        RETURNING id, email
+      `;
+      const result = await pool.query(query, [hashedPassword, email]);
+      
+      if (result.rows.length === 0) {
+        throw new Error('Brand not found');
+      }
+      
+      console.log(`✅ Password updated for brand: ${email}`);
+      return result.rows[0];
+    } catch (error) {
+      console.error('❌ Error updating brand password:', error.message);
+      throw error;
+    }
+  },
+
   // Get dashboard stats
   getStats: async () => {
     try {
