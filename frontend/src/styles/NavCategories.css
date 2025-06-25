@@ -1,0 +1,47 @@
+/* NavCategories Component Styles */
+.categories {
+  background-color: #f9f9f9;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.categories ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 15px;
+}
+
+.categories li {
+  white-space: nowrap;
+}
+
+.categories a {
+  text-decoration: none;
+  color: #555;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.categories a:hover {
+  background-color: #eee;
+  color: #333;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .categories ul {
+    padding: 0 10px;
+  }
+  
+  .categories a {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+}

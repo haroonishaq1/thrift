@@ -1,0 +1,281 @@
+.category-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f7f7;
+}
+
+.category-content {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+}
+
+.category-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 20px 0 30px;
+  text-align: center;
+  color: #333;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loading {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Carousel Styles */
+.category-carousel {
+  position: relative;
+  margin: 0 auto 40px;
+  max-width: 1000px;
+}
+
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 480px;
+}
+
+.carousel-slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+
+.slide-content {
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 32px;
+}
+
+.brand-logo {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.brand-logo img {
+  width: 60%;
+  height: auto;
+  object-fit: contain;
+}
+
+.slide-info {
+  padding-top: 40px;
+  padding-left: 120px;
+}
+
+.discount-text {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: #333;
+}
+
+.description {
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+}
+
+.slide-image {
+  position: relative;
+  height: 280px;
+  margin: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.redeem-btn {
+  background: #4169e1;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.redeem-btn:hover {
+  background: #3154b3;
+}
+
+/* Carousel Navigation */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.3s;
+}
+
+.carousel-btn.prev {
+  left: -24px;
+}
+
+.carousel-btn.next {
+  right: -24px;
+}
+
+.carousel-btn:hover {
+  background: #f0f0f0;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.carousel-dot.active {
+  background: #4169e1;
+  transform: scale(1.2);
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .category-carousel {
+    margin: 0 24px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-container {
+    height: auto;
+    aspect-ratio: 4/5;
+  }
+
+  .slide-content {
+    padding: 24px;
+  }
+
+  .brand-logo {
+    width: 60px;
+    height: 60px;
+    top: 24px;
+    left: 24px;
+  }
+
+  .slide-info {
+    padding-left: 88px;
+  }
+
+  .discount-text {
+    font-size: 24px;
+  }
+
+  .description {
+    font-size: 16px;
+  }
+
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel-btn.prev {
+    left: -20px;
+  }
+
+  .carousel-btn.next {
+    right: -20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-carousel {
+    margin: 0 16px 32px;
+  }
+
+  .slide-content {
+    padding: 16px;
+  }
+
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+    top: 16px;
+    left: 16px;
+  }
+
+  .slide-info {
+    padding-left: 64px;
+    padding-top: 24px;
+  }
+
+  .discount-text {
+    font-size: 20px;
+  }
+
+  .carousel-btn {
+    display: none;
+  }
+}

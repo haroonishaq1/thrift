@@ -1,0 +1,431 @@
+/* Brand Registration Styles */
+.brand-register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #e2e5ea 100%);
+  padding: 20px;
+}
+
+.brand-register-form-wrapper {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 550px;
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.brand-register-form-wrapper:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.brand-register-form-wrapper h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #222;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.brand-register-form-wrapper h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #444;
+  text-align: center;
+}
+
+.brand-register-step {
+  display: inline-block;
+  font-size: 15px;
+  color: #666;
+  margin: 0 auto 30px;
+  text-align: center;
+  width: auto;
+  padding: 6px 16px;
+  background-color: #f2f8ff;
+  border-radius: 50px;
+  font-weight: 500;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #e1efff;
+}
+
+.registration-status {
+  padding: 15px;
+  margin: 0 0 25px 0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 15px;
+  width: 100%;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.registration-status.success {
+  background-color: #e6f7ee;
+  color: #0c6b3d;
+  border-left: 4px solid #10b966;
+}
+
+.registration-status.error {
+  background-color: #fff2f2;
+  color: #b91c1c;
+  border-left: 4px solid #ef4444;
+}
+
+.brand-register-form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
+}
+
+.form-group label {
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 600;
+  display: block;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+
+.form-group input, 
+.form-group select {
+  padding: 14px 16px;
+  font-size: 16px;
+  width: 100%;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  color: #333;
+  font-family: inherit;
+}
+
+.form-group input::placeholder, 
+.form-group select::placeholder {
+  color: #a0aec0;
+}
+
+.form-group input:hover,
+.form-group select:hover {
+  border-color: #cbd5e0;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #4361ee;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.form-group:focus-within label {
+  color: #4361ee;
+}
+
+.form-hint {
+  font-size: 13px;
+  color: #718096;
+  margin-top: 8px;
+  display: block;
+  font-style: italic;
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 13.5px;
+  margin-top: 8px;
+  display: block;
+  font-weight: 500;
+  animation: errorShake 0.5s;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.success-message {
+  color: #10b981;
+  font-size: 15px;
+  margin: 12px 0;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 12px;
+  background-color: #ecfdf5;
+  border-radius: 6px;
+  border-left: 4px solid #10b981;
+}
+
+/* File Input Styling */
+.file-input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.file-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.file-input-label {
+  display: flex;
+  padding: 16px;
+  background-color: #f8fafc;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  text-align: center;
+  color: #4a5568;
+  font-size: 16px;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  height: 100px;
+}
+
+.file-input-label:hover,
+.file-input-container:focus-within .file-input-label {
+  border-color: #4361ee;
+  background-color: #f0f4ff;
+  color: #4361ee;
+}
+
+.file-input-label::before {
+  content: '📂 ';
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.file-input-help {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #718096;
+  text-align: center;
+}
+
+.image-preview-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.logo-preview {
+  margin-top: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+.logo-preview img {
+  max-width: 200px;
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 2px solid #e2e8f0;
+  padding: 8px;
+  background: white;
+  transition: transform 0.3s ease;
+}
+
+.logo-preview img:hover {
+  transform: scale(1.05);
+}
+
+/* Checkbox Styling */
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+}
+
+.checkbox-text {
+  font-size: 15px;
+  color: #444;
+}
+
+.checkbox-text a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.checkbox-text a:hover {
+  text-decoration: underline;
+}
+
+/* Button Styling */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  gap: 15px;
+}
+
+.back-button,
+.continue-button,
+.register-button {
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.2s;
+  min-width: 120px;
+}
+
+.back-button {
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.back-button:hover {
+  background-color: #e9ecef;
+}
+
+.continue-button,
+.register-button {
+  background-color: #007bff;
+  color: white;
+  flex-grow: 1;
+}
+
+.continue-button:hover,
+.register-button:hover {
+  background-color: #0069d9;
+  transform: translateY(-2px);
+}
+
+.form-actions button:disabled {
+  background-color: #b3d7ff;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.brand-register-footer {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 15px;
+  color: #666;
+}
+
+.brand-register-footer a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.brand-register-footer a:hover {
+  text-decoration: underline;
+}
+
+/* OTP Verification Specific Styles */
+.verify-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 15px;
+  transition: background-color 0.3s;
+}
+
+.verify-button:hover {
+  background-color: #0069d9;
+}
+
+.verify-button:disabled {
+  background-color: #b3d7ff;
+  cursor: not-allowed;
+}
+
+.resend-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 5px;
+}
+
+.resend-button:hover {
+  text-decoration: underline;
+}
+
+.timer {
+  font-size: 15px;
+  color: #666;
+  margin: 10px 0;
+}
+
+.otp-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .brand-register-form-wrapper {
+    padding: 30px 20px;
+    max-width: 100%;
+    margin: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .back-button,
+  .continue-button,
+  .register-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
