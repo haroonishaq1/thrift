@@ -54,9 +54,15 @@ function BrandLogin() {
       // Call the backend API for brand login using API service
       const data = await authAPI.brandLogin(email, password);
       
+      console.log('🔍 Brand login response:', data);
+      console.log('🔍 Token from response:', data.data?.token);
+      console.log('🔍 Brand from response:', data.data?.brand);
+      
       if (!data.success) {
         throw new Error(data.message || 'Login failed');
-      }      // Save token and brand data to local storage using our utility function
+      }
+
+      // Save token and brand data to local storage using our utility function
       const brandData = {
         id: data.data?.brand?.id,
         name: data.data?.brand?.name,
@@ -67,11 +73,20 @@ function BrandLogin() {
         adminEmail: data.data?.brand?.adminEmail
       };
       
+      console.log('🔍 Storing brand data:', brandData);
+      console.log('🔍 Storing token:', data.data?.token);
+      
       // Store auth data in local storage
       storeBrandAuth({
         token: data.data?.token,
         brand: brandData
       });
+      
+      // Verify storage immediately after
+      const storedToken = localStorage.getItem('brand-token');
+      const storedData = localStorage.getItem('brand-data');
+      console.log('🔍 Verification - Stored token:', storedToken);
+      console.log('🔍 Verification - Stored data:', storedData);
       
       // Show success message briefly before navigating
       setSuccess('Login successful! Redirecting to dashboard...');

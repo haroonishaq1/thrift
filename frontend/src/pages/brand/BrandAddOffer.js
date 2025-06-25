@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import { getBrandToken, isBrandAuthenticated, getBrandAuthHeaders } from '../../utils/auth';
+import { getBrandToken, isBrandAuthenticated } from '../../utils/auth';
+import { offersAPI } from '../../services/api';
 import '../../styles/brand/BrandAddOffer.css';
 
 function BrandAddOffer() {
@@ -20,10 +21,10 @@ function BrandAddOffer() {
   const validationSchema = Yup.object({
     offerName: Yup.string()
       .required('Offer name is required')
-      .max(50, 'Offer name must not exceed 50 characters'),
+      .max(100, 'Offer name must not exceed 100 characters'),
     description: Yup.string()
       .required('Description is required')
-      .max(500, 'Description must not exceed 500 characters'),
+      .max(1000, 'Description must not exceed 1000 characters'),
     offerImage: Yup.mixed()
       .required('Offer image is required')
       .test('fileFormat', 'Only .png, .jpg, .jpeg, and .svg files are accepted', value => {
@@ -33,7 +34,17 @@ function BrandAddOffer() {
     discountPercentage: Yup.number()
       .required('Discount percentage is required')
       .min(1, 'Discount must be at least 1%')
-      .max(100, 'Discount cannot exceed 100%')
+      .max(100, 'Discount cannot exceed 100%'),
+    category: Yup.string()
+      .required('Category is required'),
+    validUntil: Yup.date()
+      .nullable()
+      .min(new Date(), 'Valid until date must be in the future'),
+    termsConditions: Yup.string()
+      .max(500, 'Terms and conditions must not exceed 500 characters'),
+    usageLimit: Yup.number()
+      .nullable()
+      .min(1, 'Usage limit must be at least 1')
   });
   
   const handleImageChange = (event, setFieldValue) => {
@@ -60,54 +71,40 @@ function BrandAddOffer() {
     try {
       setSubmitError(null);
       
-      // Create form data for file upload
-      const formData = new FormData();
-      formData.append('title', values.offerName);
-      formData.append('description', values.description);
-      formData.append('discount_percent', values.discountPercentage);
+      // Prepare offer data for the new API
+      const offerData = {
+        title: values.offerName.trim(),
+        description: values.description.trim(),
+        discount_percent: values.discountPercentage,
+        category: values.category || 'other',
+        valid_until: values.validUntil || null,
+        terms_conditions: values.termsConditions || null,
+        usage_limit: values.usageLimit || null,
+        offerImage: values.offerImage
+      };
+
+      console.log('Creating offer with data:', offerData);
+
+      // Create offer using the new API
+      const response = await offersAPI.createOffer(offerData);
       
-      // Append the image file if it exists
-      if (values.offerImage) {
-        formData.append('offerImage', values.offerImage);
-      }      // Get the token using our utility function
-      const token = getBrandToken();
-      if (!token) {
-        throw new Error('You are not authenticated. Please login again.');
+      if (response.success) {
+        console.log('Offer created successfully:', response.data);
+        
+        // Reset form and preview
+        resetForm();
+        setImagePreview(null);
+        
+        // Navigate to offers list page with success message
+        navigate('/brand/offers', { 
+          state: { 
+            message: 'Offer created successfully!',
+            type: 'success'
+          }
+        });
+      } else {
+        throw new Error(response.message || 'Failed to create offer');
       }
-      
-      // Call the API to create a new offer using auth headers      
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/offers`, 
-        {
-          method: 'POST',
-          headers: getBrandAuthHeaders(),
-          body: formData
-        }
-      );
-      
-      // Handle non-2xx responses
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem('brand-token');
-          localStorage.removeItem('brand-data');
-          navigate('/brand/login');
-          throw new Error('Authentication expired. Please log in again.');
-        }
-        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to create offer');
-      }
-      
-      // Reset form and preview
-      resetForm();
-      setImagePreview(null);
-      
-      // Navigate to offers list page
-      navigate('/brand/offers');
     } catch (error) {
       console.error('Error creating offer:', error);
       setSubmitError(error.message || 'An error occurred while creating the offer');
@@ -130,7 +127,11 @@ function BrandAddOffer() {
             offerName: '',
             description: '',
             offerImage: null,
-            discountPercentage: ''
+            discountPercentage: '',
+            category: 'other',
+            validUntil: '',
+            termsConditions: '',
+            usageLimit: ''
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -138,7 +139,7 @@ function BrandAddOffer() {
           {({ setFieldValue, errors, touched, isSubmitting }) => (
             <Form className="brand-add-offer-form">
               <div className="form-group">
-                <label htmlFor="offerName">Offer Name</label>
+                <label htmlFor="offerName">Offer Name *</label>
                 <Field 
                   id="offerName" 
                   name="offerName" 
@@ -149,7 +150,7 @@ function BrandAddOffer() {
               </div>
               
               <div className="form-group">
-                <label htmlFor="description">Description</label>
+                <label htmlFor="description">Description *</label>
                 <Field 
                   as="textarea"
                   id="description" 
@@ -161,7 +162,7 @@ function BrandAddOffer() {
               </div>
               
               <div className="form-group">
-                <label htmlFor="discountPercentage">Discount Percentage</label>
+                <label htmlFor="discountPercentage">Discount Percentage *</label>
                 <Field 
                   id="discountPercentage" 
                   name="discountPercentage" 
@@ -172,9 +173,64 @@ function BrandAddOffer() {
                 />
                 <ErrorMessage name="discountPercentage" component="div" className="error-message" />
               </div>
+
+              <div className="form-group">
+                <label htmlFor="category">Category *</label>
+                <Field 
+                  as="select"
+                  id="category" 
+                  name="category"
+                >
+                  <option value="other">Other</option>
+                  <option value="fashion">Fashion</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="home-garden">Home & Garden</option>
+                  <option value="sports">Sports</option>
+                  <option value="beauty">Beauty</option>
+                  <option value="food-dining">Food & Dining</option>
+                  <option value="travel">Travel</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="health-fitness">Health & Fitness</option>
+                </Field>
+                <ErrorMessage name="category" component="div" className="error-message" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="validUntil">Valid Until (Optional)</label>
+                <Field 
+                  id="validUntil" 
+                  name="validUntil" 
+                  type="datetime-local"
+                />
+                <ErrorMessage name="validUntil" component="div" className="error-message" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="usageLimit">Usage Limit (Optional)</label>
+                <Field 
+                  id="usageLimit" 
+                  name="usageLimit" 
+                  type="number" 
+                  min="1"
+                  placeholder="Leave empty for unlimited usage"
+                />
+                <ErrorMessage name="usageLimit" component="div" className="error-message" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="termsConditions">Terms & Conditions (Optional)</label>
+                <Field 
+                  as="textarea"
+                  id="termsConditions" 
+                  name="termsConditions" 
+                  rows="3"
+                  placeholder="Enter terms and conditions for this offer"
+                />
+                <ErrorMessage name="termsConditions" component="div" className="error-message" />
+              </div>
               
               <div className="form-group">
-                <label htmlFor="offerImage">Offer Image</label>
+                <label htmlFor="offerImage">Offer Image *</label>
                 <div className="file-input-container">
                   <input
                     id="offerImage"

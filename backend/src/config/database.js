@@ -116,6 +116,44 @@ const initializeDatabase = async () => {
       CREATE INDEX IF NOT EXISTS idx_brand_otps_expires_at ON brand_otps(expires_at)
     `);
 
+    // Create offers table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS offers (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(100) NOT NULL,
+        description TEXT NOT NULL,
+        discount_percent DECIMAL(5,2) NOT NULL CHECK (discount_percent >= 0 AND discount_percent <= 100),
+        image_url VARCHAR(500),
+        brand_id INTEGER NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
+        category VARCHAR(50) DEFAULT 'other',
+        status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'expired')),
+        valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        valid_until TIMESTAMP,
+        terms_conditions TEXT,
+        usage_limit INTEGER,
+        used_count INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create indexes for offers table
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_offers_brand_id ON offers(brand_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_offers_category ON offers(category)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_offers_status ON offers(status)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_offers_valid_dates ON offers(valid_from, valid_until)
+    `);
+
     console.log('✅ Database tables created successfully');
 
     // Clean up expired OTPs

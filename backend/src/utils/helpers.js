@@ -2,13 +2,13 @@ const jwt = require('jsonwebtoken');
 
 // Generate JWT token
 const generateToken = (payload, expiresIn = '7d') => {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
+  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback-secret', { expiresIn });
 };
 
 // Verify JWT token
 const verifyToken = (token) => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
   } catch (error) {
     throw new Error('Invalid token');
   }

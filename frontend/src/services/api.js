@@ -252,6 +252,192 @@ export const adminAPI = {
 };
 
 /**
+ * Offers API functions
+ */
+export const offersAPI = {
+  // Get all offers (public view)
+  getAllOffers: async (filters = {}) => {
+    const queryParams = new URLSearchParams();
+    if (filters.category) queryParams.append('category', filters.category);
+    if (filters.limit) queryParams.append('limit', filters.limit);
+    if (filters.public_view) queryParams.append('public_view', 'true');
+    
+    const endpoint = `/offers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return apiRequest(endpoint, { method: 'GET' });
+  },
+
+  // Get offers for authenticated brand
+  getBrandOffers: async () => {
+    const brandToken = localStorage.getItem('brand-token');
+    
+    if (!brandToken) {
+      throw new Error('No authentication token found. Please log in again.');
+    }
+    
+    if (brandToken === 'null' || brandToken === 'undefined') {
+      throw new Error('Invalid authentication token. Please log in again.');
+    }
+    
+    return fetch(`${API_BASE_URL}/offers/brand`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${brandToken}`,
+      },
+    }).then(async (response) => {
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+      return data;
+    });
+  },
+
+  // Get featured offers
+  getFeaturedOffers: async (limit = 4) => {
+    return apiRequest(`/offers/featured?limit=${limit}`, { method: 'GET' });
+  },
+
+  // Get offers by category
+  getOffersByCategory: async (category) => {
+    return apiRequest(`/offers/category/${category}`, { method: 'GET' });
+  },
+
+  // Search offers
+  searchOffers: async (searchTerm) => {
+    const queryParams = new URLSearchParams({ q: searchTerm });
+    return apiRequest(`/offers/search?${queryParams.toString()}`, { method: 'GET' });
+  },
+
+  // Get specific offer
+  getOfferById: async (id) => {
+    return apiRequest(`/offers/${id}`, { method: 'GET' });
+  },
+
+  // Create new offer (Brand authenticated)
+  createOffer: async (offerData) => {
+    const brandToken = localStorage.getItem('brand-token');
+    
+    console.log('🔍 Creating offer with token:', brandToken);
+    console.log('🔍 Token type:', typeof brandToken);
+    console.log('🔍 Token length:', brandToken ? brandToken.length : 0);
+    
+    if (!brandToken) {
+      throw new Error('No authentication token found. Please log in again.');
+    }
+    
+    if (brandToken === 'null' || brandToken === 'undefined') {
+      throw new Error('Invalid authentication token. Please log in again.');
+    }
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('title', offerData.title);
+    formData.append('description', offerData.description);
+    formData.append('discount_percent', offerData.discount_percent);
+    
+    if (offerData.category) formData.append('category', offerData.category);
+    if (offerData.valid_until) formData.append('valid_until', offerData.valid_until);
+    if (offerData.terms_conditions) formData.append('terms_conditions', offerData.terms_conditions);
+    if (offerData.usage_limit) formData.append('usage_limit', offerData.usage_limit);
+    if (offerData.offerImage) formData.append('offerImage', offerData.offerImage);
+
+    console.log('🚀 Sending request to:', `${API_BASE_URL}/offers`);
+    console.log('🔑 Authorization header:', `Bearer ${brandToken.substring(0, 20)}...`);
+
+    return fetch(`${API_BASE_URL}/offers`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${brandToken}`,
+      },
+      body: formData,
+    }).then(async (response) => {
+      console.log('📨 Response status:', response.status);
+      const data = await response.json();
+      console.log('📨 Response data:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+      return data;
+    });
+  },
+
+  // Update offer (Brand authenticated)
+  updateOffer: async (id, offerData) => {
+    const brandToken = localStorage.getItem('brand-token');
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    if (offerData.title) formData.append('title', offerData.title);
+    if (offerData.description) formData.append('description', offerData.description);
+    if (offerData.discount_percent) formData.append('discount_percent', offerData.discount_percent);
+    if (offerData.category) formData.append('category', offerData.category);
+    if (offerData.status) formData.append('status', offerData.status);
+    if (offerData.valid_until !== undefined) formData.append('valid_until', offerData.valid_until);
+    if (offerData.terms_conditions !== undefined) formData.append('terms_conditions', offerData.terms_conditions);
+    if (offerData.usage_limit !== undefined) formData.append('usage_limit', offerData.usage_limit);
+    if (offerData.offerImage) formData.append('offerImage', offerData.offerImage);
+
+    return fetch(`${API_BASE_URL}/offers/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${brandToken}`,
+      },
+      body: formData,
+    }).then(async (response) => {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+      return data;
+    });
+  },
+
+  // Delete offer (Brand authenticated)
+  deleteOffer: async (id) => {
+    const brandToken = localStorage.getItem('brand-token');
+    return apiRequest(`/offers/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${brandToken}`,
+      },
+    });
+  },
+
+  // Update offer status (Brand authenticated)
+  updateOfferStatus: async (id, status) => {
+    const brandToken = localStorage.getItem('brand-token');
+    return apiRequest(`/offers/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${brandToken}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  // Redeem offer (public)
+  redeemOffer: async (id) => {
+    return apiRequest(`/offers/${id}/redeem`, {
+      method: 'POST',
+    });
+  },
+
+  // Get offer statistics (Brand authenticated)
+  getOfferStats: async () => {
+    const brandToken = localStorage.getItem('brand-token');
+    return apiRequest('/offers/stats/overview', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${brandToken}`,
+      },
+    });
+  },
+};
+
+/**
  * Utility functions for token management (Legacy - use auth.js utilities instead)
  */
 export const tokenUtils = {

@@ -2,8 +2,8 @@
 
 // Brand Authentication Functions
 export const isBrandAuthenticated = () => {
-  const token = localStorage.getItem('brandToken');
-  const brandData = localStorage.getItem('brandData');
+  const token = localStorage.getItem('brand-token');
+  const brandData = localStorage.getItem('brand-data');
   
   if (!token || !brandData) {
     return false;
@@ -23,9 +23,30 @@ export const isBrandAuthenticated = () => {
   }
 };
 
-export const storeBrandAuth = (token, brandData) => {
-  localStorage.setItem('brandToken', token);
-  localStorage.setItem('brandData', JSON.stringify(brandData));
+export const storeBrandAuth = (authData, legacyBrandData = null) => {
+  // Handle both object and separate parameter formats
+  let token, brandData;
+  
+  console.log('🔍 storeBrandAuth called with:', authData, legacyBrandData);
+  
+  if (typeof authData === 'object' && authData.token) {
+    // New object format: { token: ..., brand: ... }
+    token = authData.token;
+    brandData = authData.brand;
+  } else if (legacyBrandData !== null) {
+    // Old format: (token, brandData)
+    token = authData;
+    brandData = legacyBrandData;
+  } else {
+    // Fallback if only one parameter and it's a string (assume it's a token)
+    token = authData;
+    brandData = {};
+  }
+  
+  console.log('🔍 Final token to store:', token);
+  console.log('🔍 Final brand data to store:', brandData);
+  
+  localStorage.setItem('brand-token', token);
   
   // Set expiry for 24 hours from now
   const expiryTime = new Date();
@@ -36,11 +57,14 @@ export const storeBrandAuth = (token, brandData) => {
     expires: expiryTime.toISOString()
   };
   
-  localStorage.setItem('brandData', JSON.stringify(dataWithExpiry));
+  localStorage.setItem('brand-data', JSON.stringify(dataWithExpiry));
+  
+  console.log('🔍 Stored in localStorage - token:', localStorage.getItem('brand-token'));
+  console.log('🔍 Stored in localStorage - data:', localStorage.getItem('brand-data'));
 };
 
 export const getBrandData = () => {
-  const brandData = localStorage.getItem('brandData');
+  const brandData = localStorage.getItem('brand-data');
   if (!brandData) return null;
   
   try {
@@ -52,12 +76,12 @@ export const getBrandData = () => {
 };
 
 export const getBrandToken = () => {
-  return localStorage.getItem('brandToken');
+  return localStorage.getItem('brand-token');
 };
 
 export const clearBrandAuth = () => {
-  localStorage.removeItem('brandToken');
-  localStorage.removeItem('brandData');
+  localStorage.removeItem('brand-token');
+  localStorage.removeItem('brand-data');
 };
 
 // User Authentication Functions (for regular users)

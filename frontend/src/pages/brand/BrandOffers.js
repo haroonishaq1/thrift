@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBrandToken, isBrandAuthenticated, getBrandAuthHeaders, clearBrandAuth } from '../../utils/auth';
+import { isBrandAuthenticated, clearBrandAuth } from '../../utils/auth';
+import { offersAPI } from '../../services/api';
 import '../../styles/brand/BrandOffers.css';
 
 function BrandOffers() {
@@ -15,42 +16,62 @@ function BrandOffers() {
     }
   }, [navigate]);
 
+  // Calculate stats from offers
+  const calculateStats = (offersData) => {
+    const total = offersData.length;
+    let active = 0;
+    let expired = 0;
+    
+    offersData.forEach(offer => {
+      const now = new Date();
+      const isExpired = offer.valid_until ? new Date(offer.valid_until) < now : false;
+      
+      if (isExpired || offer.status === 'expired') {
+        expired++;
+      } else if (offer.status === 'active') {
+        active++;
+      }
+    });
+    
+    return { total, active, expired };
+  };
+
   // Load offers from API
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        setIsLoading(true);        // Check authentication using our utility function
+        setIsLoading(true);
+        
+        // Check authentication using our utility function
         if (!isBrandAuthenticated()) {
           throw new Error('You are not authenticated. Please login again.');
         }
-          const response = await fetch(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/offers/brand/list`,
-          {
-            headers: getBrandAuthHeaders()
-          }
-        );
-        
-        // Handle non-2xx responses
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
-            clearBrandAuth();
-            navigate('/brand/login');
-            throw new Error('Authentication expired. Please log in again.');
-          }
-          throw new Error(`Server responded with ${response.status}`);
-        }
-        
-        const data = await response.json();
+
+        // Use the API service function
+        const data = await offersAPI.getBrandOffers();
         
         if (!data.success) {
           throw new Error(data.message || 'Failed to fetch offers');
         }
         
-        setOffers(data.data.offers);
-        setStats(data.data.stats);
+        setOffers(data.data);
+        
+        // Calculate and set stats
+        const calculatedStats = calculateStats(data.data);
+        setStats(calculatedStats);
+        
+        console.log('✅ Offers loaded successfully:', data.data);
+        console.log('📊 Stats calculated:', calculatedStats);
+        setError(null);
       } catch (err) {
-        console.error('Error fetching offers:', err);
+        console.error('❌ Error fetching offers:', err);
         setError(err.message);
+        
+        // Handle authentication errors
+        if (err.message.includes('authentication') || err.message.includes('token')) {
+          clearBrandAuth();
+          navigate('/brand/login');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -122,15 +143,15 @@ function BrandOffers() {
       }
       
       // Update state with removed offer
-      setOffers(offers.filter(offer => offer.id !== offerId));
+      const updatedOffers = offers.filter(offer => offer.id !== offerId);
+      setOffers(updatedOffers);
       
-      // Update stats
-      setStats(prevStats => ({
-        ...prevStats,
-        total: Math.max(0, prevStats.total - 1),
-        active: offerToDelete.current_status === 'active' ? Math.max(0, prevStats.active - 1) : prevStats.active,
-        expired: offerToDelete.current_status === 'expired' ? Math.max(0, prevStats.expired - 1) : prevStats.expired
-      }));
+      // Recalculate stats
+      const updatedStats = calculateStats(updatedOffers);
+      setStats(updatedStats);
+      
+      console.log('✅ Offer deleted successfully');
+      console.log('📊 Updated stats:', updatedStats);
       
     } catch (error) {
       console.error('Error deleting offer:', error);
@@ -212,9 +233,9 @@ function BrandOffers() {
                 return (
                   <tr key={offer.id} className={isExpired ? 'expired-offer' : ''}>
                     <td className="offer-image-cell">
-                      {offer.image ? (
+                      {offer.image_url ? (
                         <img 
-                          src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${offer.image}`} 
+                          src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${offer.image_url}`} 
                           alt={offer.title}
                           className="offer-thumbnail" 
                         />

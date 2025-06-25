@@ -32,6 +32,7 @@ import BrandDashboard from './pages/brand/BrandDashboard';
 import BrandOffers from './pages/brand/BrandOffers';
 import BrandAddOffer from './pages/brand/BrandAddOffer';
 import BrandAnalytics from './pages/brand/BrandAnalytics';
+import OfferDebugger from './pages/brand/OfferDebugger';
 
 // Admin Panel Routes
 import AdminLogin from './pages/admin/AdminLogin';
@@ -109,6 +110,7 @@ function App() {
           <Route path="/brand/offers" element={<BrandLayout><BrandOffers /></BrandLayout>} />
           <Route path="/brand/add-offer" element={<BrandLayout><BrandAddOffer /></BrandLayout>} />
           <Route path="/brand/analytics" element={<BrandLayout><BrandAnalytics /></BrandLayout>} />
+          <Route path="/brand/debug" element={<BrandLayout><OfferDebugger /></BrandLayout>} />
           
           {/* Admin Panel Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
