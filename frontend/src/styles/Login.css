@@ -167,13 +167,29 @@ select {
   margin: 0 10px;
 }
 
-/* Error message styling */
+/* Error and success message styling */
+.error-message,
+.success-message {
+  margin: 15px 0;
+  padding: 12px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .error-message {
-  color: #d32f2f;
-  font-size: 0.8rem;
-  margin-top: 5px;
-  margin-bottom: 0;
-  text-align: left;
+  background-color: #fff2f2;
+  color: #dc3545;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  background-color: #f2fff2;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
 /* Form buttons styling */
