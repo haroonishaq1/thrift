@@ -45,48 +45,40 @@ const AdminLogin = () => {
 
   return (
     <div className="admin-login-container">
-      <div className="admin-login-box">
-        <div className="admin-login-header">
-          <h1>🔒 Admin Login</h1>
-          <p>Enter your secret key to access the admin panel</p>
-        </div>
+      <div className="admin-login-form-wrapper">
+        <h1>Admin</h1>
+        <h2>Login to Admin Panel</h2>
+        
+        {error && (
+          <div className="error-message">
+            <span>⚠️</span>
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="admin-login-form">
+        <form className="admin-login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="secretKey">Secret Key</label>
+            <label htmlFor="secretKey">Admin Secret Key</label>
             <input
               type="password"
               id="secretKey"
               value={secretKey}
               onChange={(e) => setSecretKey(e.target.value)}
               placeholder="Enter admin secret key"
-              className={error ? 'error' : ''}
               disabled={loading}
+              className={error ? 'error' : ''}
             />
           </div>
-
-          {error && (
-            <div className="error-message">
-              ❌ {error}
-            </div>
-          )}
 
           <button 
             type="submit" 
             className="admin-login-btn"
             disabled={loading}
           >
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                Logging in...
-              </>
-            ) : (
-              'Login as Admin'
-            )}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
-
+        
         <div className="admin-login-footer">
           <p>🔐 Only authorized personnel can access this area</p>
         </div>

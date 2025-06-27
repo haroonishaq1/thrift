@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bar, Pie, Line } from 'react-chartjs-2';
-import { isBrandAuthenticated } from '../../utils/auth';
+import { isBrandAuthenticated, clearBrandAuth } from '../../utils/auth';
+import { offersAPI } from '../../services/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -39,8 +40,11 @@ function BrandAnalytics() {
     expired: 0,
     deleted: 0
   });
-  const [activeOffer, setActiveOffer] = useState(null);  const [monthlyData, setMonthlyData] = useState([]);
+  const [activeOffer, setActiveOffer] = useState(null);
+  const [monthlyData, setMonthlyData] = useState([]);
   const [yearsList, setYearsList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Check for token and redirect to login if not present
   useEffect(() => {
@@ -48,14 +52,69 @@ function BrandAnalytics() {
       navigate('/brand/login');
     }
   }, [navigate]);
-  
-  // Load offers data
-  useEffect(() => {
-    // In a real application, this would be an API call
-    const storedOffers = JSON.parse(localStorage.getItem('brandOffers') || '[]');
+
+  // Calculate stats from offers (same logic as BrandOffers)
+  const calculateStats = (offersData) => {
+    const total = offersData.length;
+    let active = 0;
+    let expired = 0;
     
-    // Get deleted offers count from localStorage (if available)
-    const deletedCount = parseInt(localStorage.getItem('deletedOffersCount') || '0');
+    offersData.forEach(offer => {
+      const now = new Date();
+      const isExpired = offer.valid_until ? new Date(offer.valid_until) < now : false;
+      
+      if (isExpired || offer.status === 'expired') {
+        expired++;
+      } else if (offer.status === 'active') {
+        active++;
+      }
+    });
+    
+    return { total, active, expired };
+  };
+  
+  // Load offers data from API
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Check authentication using our utility function
+        if (!isBrandAuthenticated()) {
+          throw new Error('You are not authenticated. Please login again.');
+        }
+
+        // Use the API service function
+        const data = await offersAPI.getBrandOffers();
+        
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to fetch offers');
+        }
+        
+        setOffers(data.data);
+        
+        // Calculate and set stats
+        const calculatedStats = calculateStats(data.data);
+        setStats(calculatedStats);
+        
+        console.log('✅ Analytics data loaded successfully:', data.data);
+        console.log('📊 Analytics stats calculated:', calculatedStats);
+        setError(null);
+      } catch (err) {
+        console.error('❌ Error fetching analytics data:', err);
+        setError(err.message);
+        
+        // Handle authentication errors
+        if (err.message.includes('authentication') || err.message.includes('token')) {
+          clearBrandAuth();
+          navigate('/brand/login');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOffers();
       // Create a list of the last 10 years for the filter
     const currentYear = new Date().getFullYear();
     const pastYears = Array.from({ length: 10 }, (_, i) => currentYear - i);
@@ -67,44 +126,19 @@ function BrandAnalytics() {
       setSelectedYear(currentYear);
     }
     
-    setOffers(storedOffers);
-    
-    // Update deleted count in stats
-    setStats(prevStats => ({
-      ...prevStats,
-      deleted: deletedCount
-    }));
-    
-  }, [selectedYear]);
+  }, []);  // Remove selectedYear dependency since we now fetch data once
   
-  // Calculate statistics whenever offers change
+  // Update active offer and monthly data whenever offers change
   useEffect(() => {
+    if (offers.length === 0) return;
+    
     const now = new Date();
     
-    // Find active offer
+    // Find active offer (using correct field names)
     const active = offers.find(offer => {
-      const expiryDate = new Date(offer.expiryDate);
-      return now < expiryDate;
+      const expiryDate = offer.valid_until ? new Date(offer.valid_until) : null;
+      return offer.status === 'active' && (!expiryDate || now < expiryDate);
     });
-    
-    // Count active and expired offers
-    const activeCount = offers.filter(offer => {
-      const expiryDate = new Date(offer.expiryDate);
-      return now < expiryDate;
-    }).length;
-    
-    const expiredCount = offers.filter(offer => {
-      const expiryDate = new Date(offer.expiryDate);
-      return now >= expiryDate;
-    }).length;
-    
-    // Update stats
-    setStats(prevStats => ({
-      ...prevStats,
-      total: offers.length,
-      active: activeCount,
-      expired: expiredCount
-    }));
     
     // Set active offer details
     setActiveOffer(active);
@@ -113,14 +147,15 @@ function BrandAnalytics() {
     generateMonthlyData(selectedYear);
     
   }, [offers, selectedYear]);
-    // Generate data for monthly offers chart
+
+  // Generate data for monthly offers chart
   const generateMonthlyData = (year) => {
     // Initialize array with zeros for all months
     const monthsData = Array(12).fill(0);
     
-    // Count offers by month for the selected year
+    // Count offers by month for the selected year (using correct field name)
     offers.forEach(offer => {
-      const offerDate = new Date(offer.createdAt);
+      const offerDate = new Date(offer.created_at); // Use created_at instead of createdAt
       const offerYear = offerDate.getFullYear();
       
       if (offerYear === year) {
@@ -136,16 +171,16 @@ function BrandAnalytics() {
   const isLatestOfferExpired = () => {
     if (offers.length === 0) return true;
     
-    // Sort offers by creation date (newest first)
+    // Sort offers by creation date (newest first) - using correct field name
     const sortedOffers = [...offers].sort((a, b) => 
-      new Date(b.createdAt) - new Date(a.createdAt)
+      new Date(b.created_at) - new Date(a.created_at) // Use created_at instead of createdAt
     );
     
     const latestOffer = sortedOffers[0];
     const now = new Date();
-    const expiryDate = new Date(latestOffer.expiryDate);
+    const expiryDate = new Date(latestOffer.valid_until); // Use valid_until instead of expiryDate
     
-    return now > expiryDate;
+    return now > expiryDate || latestOffer.status === 'expired';
   };
   
   // Format a date nicely
@@ -236,23 +271,37 @@ function BrandAnalytics() {
   
   return (
     <div className="brand-analytics-container">
-      <div className="analytics-header">
-        <h2>Brand Analytics Dashboard</h2>
-        <div className="year-filter">
-          <label htmlFor="yearSelect">Select Year:</label>
-          <select 
-            id="yearSelect"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            {yearsList.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner">Loading analytics...</div>
         </div>
-      </div>
-      
-      <div className="stats-cards-container">
+      ) : error ? (
+        <div className="error-container">
+          <div className="error-message">
+            <h3>Error Loading Analytics</h3>
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()}>Retry</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="analytics-header">
+            <h2>Brand Analytics Dashboard</h2>
+            <div className="year-filter">
+              <label htmlFor="yearSelect">Select Year:</label>
+              <select 
+                id="yearSelect"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              >
+                {yearsList.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div className="stats-cards-container">
         <div className="stats-card">
           <h3>Total Offers</h3>
           <div className="stat-value">{stats.total}</div>
@@ -376,6 +425,8 @@ function BrandAnalytics() {
           View All Offers
         </button>
       </div>
+      </>
+      )}
     </div>
   );
 }
