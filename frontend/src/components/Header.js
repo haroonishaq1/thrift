@@ -42,9 +42,6 @@ function Header({ isLoggedIn }) {
   return (
     <header className="header">
       <div className="header-container">
-        <div className="menu-icon">
-          <span>☰</span>
-        </div>
         <div className="logo">
           <Link to="/">
             <h1>Thrift</h1>

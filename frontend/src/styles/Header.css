@@ -25,6 +25,10 @@
   display: none;
 }
 
+.logo a {
+  text-decoration: none;
+}
+
 .logo h1 {
   font-size: 28px;
   font-weight: bold;

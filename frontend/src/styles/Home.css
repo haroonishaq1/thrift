@@ -249,12 +249,19 @@
 
 .hot-deals .section-header {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.hot-deals .header-content {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 30px;
   text-align: center;
   flex-direction: column;
+  flex: 1;
 }
 
 .hot-deals .section-header h2 {
@@ -270,6 +277,23 @@
   margin: 10px 0 0 0;
 }
 
+.hot-deals .show-more {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.hot-deals .show-more:hover {
+  text-decoration: underline;
+}
+
 .fire-icon {
   color: #ff4444;
   font-size: 32px;
@@ -283,59 +307,186 @@
   margin-top: 40px;
 }
 
-/* Featured Categories Section */
-.featured-categories {
+/* Shop by Category Section */
+.shop-by-category {
   padding: 60px 0;
-  background-color: #fff;
+  background: #ffffff;
 }
 
-.featured-categories h2 {
-  font-size: 32px;
-  font-weight: 700;
+.shop-by-category .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.main-section-header {
   text-align: center;
   margin-bottom: 40px;
+}
+
+.main-section-header h2 {
+  font-size: 36px;
+  font-weight: 700;
   color: #333;
+  margin: 0;
 }
 
-.categories-grid {
+.category-section {
+  width: 100%;
+}
+
+.category-header {
+  margin-bottom: 40px;
+}
+
+.category-title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.category-title-section h3 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.category-title-section .show-more {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+
+.category-title-section .show-more:hover {
+  text-decoration: underline;
+}
+
+.category-description {
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 800px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-offers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-  margin-top: 40px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
-.category-card {
+.offer-card {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
-  cursor: pointer;
 }
 
-.category-card:hover {
+.offer-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
-.category-card img {
+.offer-image {
   width: 100%;
   height: 200px;
+  overflow: hidden;
+}
+
+.offer-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.category-card h3 {
-  font-size: 20px;
+.offer-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.offer-content h4 {
+  font-size: 16px;
   font-weight: 600;
-  margin: 20px 20px 10px 20px;
   color: #333;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.category-card p {
-  font-size: 14px;
-  color: #666;
-  margin: 0 20px 20px 20px;
-  line-height: 1.4;
+/* Responsive Design for Shop by Category */
+@media (max-width: 1024px) {
+  .category-offers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-section-header h2 {
+    font-size: 28px;
+  }
+  
+  .category-title-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .category-title-section h3 {
+    font-size: 24px;
+  }
+  
+  .category-description {
+    font-size: 16px;
+  }
+  
+  .category-offers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .offer-content h4 {
+    font-size: 14px;
+  }
+  
+  .offer-image {
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-offers-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .offer-image {
+    height: 180px;
+  }
+  
+  .main-section-header h2 {
+    font-size: 24px;
+  }
+  
+  .category-title-section h3 {
+    font-size: 20px;
+  }
+  
+  .category-description {
+    font-size: 14px;
+  }
 }
 
 /* Category Sections */
@@ -590,8 +741,7 @@
     font-size: 24px;
   }
   
-  .deals-grid,
-  .categories-grid {
+  .deals-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
@@ -600,9 +750,18 @@
     padding: 0 15px;
   }
   
-  .hot-deals,
-  .featured-categories {
+  .hot-deals {
     padding: 40px 0;
+  }
+  
+  .hot-deals .section-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .hot-deals .show-more {
+    margin-top: 0;
   }
   
   .carousel-wrapper {
@@ -757,5 +916,74 @@
   
   .offer-content {
     padding: 15px;
+  }
+
+  /* Shop by Category responsive */
+  .shop-by-category {
+    padding: 60px 0;
+  }
+
+  .shop-by-category .section-header h2 {
+    font-size: 28px;
+  }
+
+  .category-card {
+    padding: 30px 20px;
+  }
+
+  .category-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .category-info {
+    margin: 0;
+  }
+
+  .category-info h3 {
+    font-size: 22px;
+  }
+
+  .category-offers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .offer-card {
+    padding: 15px;
+  }
+
+  .offer-card h4 {
+    font-size: 12px;
+  }
+
+  .offer-image {
+    height: 80px;
+  }
+}
+
+/* Additional mobile styles for very small screens */
+@media (max-width: 480px) {
+  .category-offers-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .category-card {
+    padding: 25px 15px;
+  }
+
+  .category-info h3 {
+    font-size: 20px;
+  }
+
+  .category-info p {
+    font-size: 14px;
+  }
+
+  .show-more-btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }

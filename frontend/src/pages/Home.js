@@ -5,7 +5,7 @@ import Header from '../components/Header';
 import NavCategories from '../components/NavCategories';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
-import { FaChevronLeft, FaChevronRight, FaFire } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaFire, FaLaptop } from 'react-icons/fa';
 
 function Home({ isLoggedIn }) {
   const [currentSlide, setCurrentSlide] = useState(5); // Start at index 5 (middle of extended array)
@@ -136,6 +136,20 @@ function Home({ isLoggedIn }) {
       title: '15% off all Apple products every month',
       description: '🍎',
       logoAlt: 'Grover'
+    },
+    {
+      imageSrc: '/images/nike-student.jpg',
+      logo: '/images/logos/nike.png',
+      title: 'Nike Student Discount',
+      description: '👟 Get 10% off on all Nike products',
+      logoAlt: 'Nike'
+    },
+    {
+      imageSrc: '/images/spotify-premium.jpg',
+      logo: '/images/logos/spotify.png',
+      title: 'Spotify Premium Student',
+      description: '🎵 50% off Premium for students',
+      logoAlt: 'Spotify'
     }
   ];
 
@@ -186,9 +200,14 @@ function Home({ isLoggedIn }) {
       <section className="hot-deals">
         <div className="container">
           <div className="section-header">
-            <FaFire className="fire-icon" />
-            <h2>Hot Deals</h2>
-            <p>Don't miss out on these amazing student discounts!</p>
+            <div className="header-content">
+              <FaFire className="fire-icon" />
+              <h2>Hot Deals</h2>
+              <p>Don't miss out on these amazing student discounts!</p>
+            </div>
+            <button className="show-more">
+              Show more <span>→</span>
+            </button>
           </div>
           <div className="deals-grid">
             {featuredDeals.map((deal, index) => (
@@ -205,30 +224,110 @@ function Home({ isLoggedIn }) {
         </div>
       </section>
 
-      {/* Featured Categories */}
-      <section className="featured-categories">
+      {/* Shop by Category Section */}
+      <section className="shop-by-category">
         <div className="container">
-          <h2>Shop by Category</h2>
-          <div className="categories-grid">
-            <div className="category-card" onClick={() => navigate('/category/fashion')}>
-              <img src="/images/categories/fashion.jpg" alt="Fashion" />
-              <h3>Fashion</h3>
-              <p>Student discounts on clothing, shoes & accessories</p>
+          <div className="main-section-header">
+            <h2>Shop by Category</h2>
+          </div>
+          
+          <div className="category-section">
+            <div className="category-header">
+              <div className="category-title-section">
+                <h3>Electronics & Technology</h3>
+                <button className="show-more">
+                  Show more <span>→</span>
+                </button>
+              </div>
+              <p className="category-description">Need a new smartphone, MacBook, or laptop? From Apple to MediaMarkt: We have the best tech deals for students.</p>
             </div>
-            <div className="category-card" onClick={() => navigate('/category/technology')}>
-              <img src="/images/categories/tech.jpg" alt="Technology" />
-              <h3>Technology</h3>
-              <p>Laptops, phones, gadgets & software at student prices</p>
+            
+            <div className="category-offers-grid">
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/apple.jpg" alt="Apple" />
+                </div>
+                <div className="offer-content">
+                  <h4>Save with Apple Education Pricing</h4>
+                </div>
+              </div>
+              
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/mediamarkt.jpg" alt="MediaMarkt" />
+                </div>
+                <div className="offer-content">
+                  <h4>Save 10€ on every order of 100€ or more</h4>
+                </div>
+              </div>
+              
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/amazon-prime.jpg" alt="Amazon Prime" />
+                </div>
+                <div className="offer-content">
+                  <h4>Prime Student Membership 6 months free for you</h4>
+                </div>
+              </div>
+              
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/disney.jpg" alt="Disney+" />
+                </div>
+                <div className="offer-content">
+                  <h4>Save over 15% with an annual subscription*</h4>
+                </div>
+              </div>
             </div>
-            <div className="category-card" onClick={() => navigate('/category/food-drink')}>
-              <img src="/images/categories/food.jpg" alt="Food & Drink" />
-              <h3>Food & Drink</h3>
-              <p>Restaurants, cafes & food delivery discounts</p>
+          </div>
+          
+          <div className="category-section">
+            <div className="category-header">
+              <div className="category-title-section">
+                <h3>Fashion</h3>
+                <button className="show-more">
+                  Show more <span>→</span>
+                </button>
+              </div>
+              <p className="category-description">Stay stylish with the best fashion deals for students. From trendy clothing to accessories, find your perfect look for less.</p>
             </div>
-            <div className="category-card" onClick={() => navigate('/category/entertainment')}>
-              <img src="/images/categories/entertainment.jpg" alt="Entertainment" />
-              <h3>Entertainment</h3>
-              <p>Streaming, gaming, cinema & events</p>
+            
+            <div className="category-offers-grid">
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/hm.jpg" alt="H&M" />
+                </div>
+                <div className="offer-content">
+                  <h4>H&M Student Discount 15% off</h4>
+                </div>
+              </div>
+              
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/zara.jpg" alt="Zara" />
+                </div>
+                <div className="offer-content">
+                  <h4>Zara Student Discount 10% off all items</h4>
+                </div>
+              </div>
+              
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/adidas.jpg" alt="Adidas" />
+                </div>
+                <div className="offer-content">
+                  <h4>Adidas Student Discount 20% off</h4>
+                </div>
+              </div>
+              
+              <div className="offer-card">
+                <div className="offer-image">
+                  <img src="/images/categories/nike-fashion.jpg" alt="Nike" />
+                </div>
+                <div className="offer-content">
+                  <h4>Nike Student Discount 15% off fashion items</h4>
+                </div>
+              </div>
             </div>
           </div>
         </div>

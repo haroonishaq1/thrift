@@ -17,9 +17,6 @@ function ProductCard({ id, brand, discount, logo, imageSrc, title, description, 
           <img src={imageSrc} alt={title || brand} />
         </div>
       )}
-      <div className="brand-logo">
-        {logo && <img src={logo} alt={logoAlt || brand} />}
-      </div>
       <div className="card-content">
         <h3 className="brand-name">{title || brand}</h3>
         <p className="discount">{description || discount}</p>
