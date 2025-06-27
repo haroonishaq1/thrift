@@ -27,9 +27,9 @@ function BrandAddOffer() {
       .max(1000, 'Description must not exceed 1000 characters'),
     offerImage: Yup.mixed()
       .required('Offer image is required')
-      .test('fileFormat', 'Only .png, .jpg, .jpeg, and .svg files are accepted', value => {
+      .test('fileFormat', 'Only .png, .jpg, .jpeg, .webp, and .svg files are accepted', value => {
         if (!value) return true;
-        return ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(value.type);
+        return ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'].includes(value.type);
       }),
     discountPercentage: Yup.number()
       .required('Discount percentage is required')
@@ -52,7 +52,7 @@ function BrandAddOffer() {
     
     if (file) {
       // Check if file is one of the allowed types
-      if (['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(file.type)) {
+      if (['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'].includes(file.type)) {
         setFieldValue('offerImage', file);
         
         // Create a preview for the image
@@ -236,7 +236,7 @@ function BrandAddOffer() {
                     id="offerImage"
                     name="offerImage"
                     type="file"
-                    accept=".png,.jpg,.jpeg,.svg"
+                    accept=".png,.jpg,.jpeg,.webp,.svg"
                     onChange={(event) => handleImageChange(event, setFieldValue)}
                     className="file-input"
                   />

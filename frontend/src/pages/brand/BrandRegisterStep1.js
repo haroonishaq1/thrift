@@ -23,9 +23,9 @@ function BrandRegisterStep1() {
       .matches(/^[a-zA-Z0-9]+$/, 'Admin username can only contain letters and numbers'),
     logoImage: Yup.mixed()
       .required('Brand logo is required')
-      .test('fileFormat', 'Only .png, .jpg, .jpeg, and .svg files are accepted', value => {
+      .test('fileFormat', 'Only .png, .jpg, .jpeg, .webp, and .svg files are accepted', value => {
         if (!value) return true;
-        return ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(value.type);
+        return ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'].includes(value.type);
       }),
     category: Yup.string()
       .required('Please select a category'),
@@ -36,7 +36,7 @@ function BrandRegisterStep1() {
     
     if (file) {
       // Check if file is one of the allowed types
-      if (['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(file.type)) {
+      if (['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'].includes(file.type)) {
         // Check file size (limit to 2MB)
         if (file.size > 2 * 1024 * 1024) {
           setFieldValue('logoImage', undefined);
@@ -57,7 +57,7 @@ function BrandRegisterStep1() {
         // Clear the input and set field error
         event.target.value = null;
         setFieldValue('logoImage', undefined);
-        setFieldValue('logoImage', undefined, { validationMessage: 'Only .png, .jpg, .jpeg, and .svg files are accepted' });
+        setFieldValue('logoImage', undefined, { validationMessage: 'Only .png, .jpg, .jpeg, .webp, and .svg files are accepted' });
       }
     }
   };
@@ -154,11 +154,11 @@ function BrandRegisterStep1() {
                   id="logoImage"
                   name="logoImage"
                   type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
                   onChange={(event) => handleFileChange(event, setFieldValue)}
                   className="file-input"
                 />
-                <div className="file-input-help">Upload your brand logo (PNG, JPG or SVG, max 2MB)</div>
+                <div className="file-input-help">Upload your brand logo (PNG, JPG, WEBP or SVG, max 2MB)</div>
                 <ErrorMessage name="logoImage" component="div" className="error-message" />
                 
                 {filePreview && (
