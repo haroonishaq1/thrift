@@ -4,10 +4,6 @@ const { Brand } = require('../models/Brand');
 const { BrandOTP } = require('../models/BrandOTP');
 const { sendOTPEmail } = require('../utils/emailService');
 
-// Mock brand data storage (replace with actual database in production)
-let brands = [];
-let brandCounter = 1;
-
 // Brand Registration
 const register = async (req, res) => {
   try {
@@ -55,42 +51,35 @@ const register = async (req, res) => {
     }
 
     // Check if brand already exists
-    const existingBrand = brands.find(brand => 
-      brand.email.toLowerCase() === email.toLowerCase() || 
-      brand.adminUsername.toLowerCase() === adminUsername.toLowerCase()
-    );
-
+    const existingBrand = await Brand.findByEmail(email);
     if (existingBrand) {
       console.log('❌ Brand already exists');
       return res.status(400).json(
-        formatResponse(false, 'Brand with this email or admin username already exists')
+        formatResponse(false, 'Brand with this email already exists')
       );
     }
 
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // Handle logo upload
+    let logoUrl = null;
+    if (req.file) {
+      logoUrl = `/uploads/brand-logos/${req.file.filename}`;
+    }
 
     // Create brand object
-    const newBrand = {
-      id: brandCounter++,
+    const brandData = {
       name,
       email: email.toLowerCase(),
-      password: hashedPassword,
+      password,
       description: description || '',
       website,
-      logo: logo || '',
       adminUsername,
-      category,
-      country,
-      phoneNumber: phoneNumber || '',
-      verified: true, // Auto-verify for demo purposes
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      adminEmail: email.toLowerCase(),
+      logoUrl,
+      category
     };
 
-    // Store brand
-    brands.push(newBrand);
+    // Create brand in database
+    const newBrand = await Brand.create(brandData);
 
     console.log('✅ Brand registered successfully');
     console.log('📧 Brand email:', email);
@@ -140,32 +129,17 @@ const login = async (req, res) => {
       );
     }
 
-    // Find brand
-    const brand = brands.find(b => b.email.toLowerCase() === email.toLowerCase());
-
-    if (!brand) {
-      console.log('❌ Brand not found');
+    // Verify credentials using Brand model
+    const credentialCheck = await Brand.verifyCredentials(email, password);
+    
+    if (!credentialCheck.valid) {
+      console.log('❌ Invalid credentials or brand not approved');
       return res.status(400).json(
-        formatResponse(false, 'Invalid email or password')
+        formatResponse(false, credentialCheck.message)
       );
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, brand.password);
-
-    if (!isPasswordValid) {
-      console.log('❌ Invalid password');
-      return res.status(400).json(
-        formatResponse(false, 'Invalid email or password')
-      );
-    }
-
-    // Check if brand is verified
-    if (!brand.verified) {
-      return res.status(400).json(
-        formatResponse(false, 'Please verify your brand account first')
-      );
-    }
+    const brand = credentialCheck.brand;
 
     console.log('✅ Brand login successful');
 
@@ -199,7 +173,7 @@ const login = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const brandId = req.user.id;
-    const brand = brands.find(b => b.id === brandId);
+    const brand = await Brand.findById(brandId);
 
     if (!brand) {
       return res.status(404).json(

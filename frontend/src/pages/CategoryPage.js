@@ -5,7 +5,7 @@ import '../styles/CategoryPage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import NavCategories from '../components/NavCategories';
-import { getOffersByCategory, getHotDealsOffers } from '../services/offerData';
+import { offersAPI } from '../services/api';
 
 function CategoryPage() {
   const { category } = useParams();
@@ -18,19 +18,21 @@ function CategoryPage() {
     const fetchOffers = async () => {
       setLoading(true);
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
         let categoryOffers;
         if (category === 'hot-deals') {
-          categoryOffers = getHotDealsOffers();
+          // Fetch featured offers for hot deals
+          const response = await offersAPI.getFeaturedOffers();
+          categoryOffers = response.data || [];
         } else {
-          categoryOffers = getOffersByCategory(category);
+          // Fetch offers by category
+          const response = await offersAPI.getOffersByCategory(category);
+          categoryOffers = response.data || [];
         }
         
         setOffers(categoryOffers);
       } catch (error) {
         console.error('Error fetching offers:', error);
+        setOffers([]);
       } finally {
         setLoading(false);
       }
@@ -98,14 +100,23 @@ function CategoryPage() {
                     >
                       <div className="slide-content">
                         <div className="brand-logo">
-                          <img src={offer.logo} alt={offer.brand} />
+                          <img 
+                            src={`/images/logos/${offer.brand_name?.toLowerCase()}.png`} 
+                            alt={offer.brand_name} 
+                            onError={(e) => {
+                              e.target.src = '/images/logos/default.png';
+                            }}
+                          />
                         </div>
                         <div className="slide-info">
-                          <h2 className="discount-text">{offer.discount}</h2>
+                          <h2 className="discount-text">{offer.discount_percent}% OFF</h2>
                           <p className="description">{offer.description}</p>
                         </div>
                         <div className="slide-image">
-                          <img src={offer.image} alt={offer.title} />
+                          <img 
+                            src={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'} 
+                            alt={offer.title} 
+                          />
                         </div>
                         <button 
                           className="redeem-btn"

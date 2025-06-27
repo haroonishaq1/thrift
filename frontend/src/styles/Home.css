@@ -283,6 +283,13 @@
   margin-top: 40px;
 }
 
+.category-offers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  margin-top: 40px;
+}
+
 
 
 /* Category Sections */
@@ -466,6 +473,43 @@
   font-weight: 600;
   margin: 0;
   color: #333;
+}
+
+/* Loading and Empty States */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #666;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.no-offers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.no-offers p {
+  font-size: 16px;
+  color: #888;
+  margin: 0;
 }
 
 /* Responsive styles */

@@ -269,7 +269,7 @@ const Offer = {
   getFeatured: async (limit = 4) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name
+        SELECT o.*, b.name as brand_name, b.logo_url as brand_logo_url
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE o.status = 'active' 
@@ -289,7 +289,7 @@ const Offer = {
   getByCategory: async (category) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name
+        SELECT o.*, b.name as brand_name, b.logo_url as brand_logo_url
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE o.category = $1 

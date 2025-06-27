@@ -6,11 +6,48 @@ import NavCategories from '../components/NavCategories';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import { FaChevronLeft, FaChevronRight, FaFire, FaLaptop } from 'react-icons/fa';
+import { offersAPI } from '../services/api';
 
 function Home({ isLoggedIn }) {
   const [currentSlide, setCurrentSlide] = useState(5); // Start at index 5 (middle of extended array)
   const [itemsPerView, setItemsPerView] = useState(3);
+  const [electronicsOffers, setElectronicsOffers] = useState([]);
+  const [fashionOffers, setFashionOffers] = useState([]);
+  const [featuredOffers, setFeaturedOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Fetch data from database
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch electronics offers
+        const electronicsResponse = await offersAPI.getOffersByCategory('electronics');
+        setElectronicsOffers(electronicsResponse.data?.slice(0, 4) || []);
+        
+        // Fetch fashion offers
+        const fashionResponse = await offersAPI.getOffersByCategory('fashion');
+        setFashionOffers(fashionResponse.data?.slice(0, 4) || []);
+        
+        // Fetch featured offers (hot deals)
+        const featuredResponse = await offersAPI.getFeaturedOffers(4);
+        setFeaturedOffers(featuredResponse.data || []);
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Set empty arrays as fallback
+        setElectronicsOffers([]);
+        setFashionOffers([]);
+        setFeaturedOffers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => {
@@ -126,42 +163,6 @@ function Home({ isLoggedIn }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Featured deals data
-  const featuredDeals = [
-    {
-      id: '1',
-      imageSrc: '/images/samsung-s25.jpg',
-      logo: '/images/logos/samsung.png',
-      title: 'The new Galaxy S25 Edge',
-      description: '📱 ✨ Pre-order now and secure benefits.*',
-      logoAlt: 'Samsung'
-    },
-    {
-      id: '10',
-      imageSrc: '/images/grover-apple.jpg',
-      logo: '/images/logos/grover.png',
-      title: '15% off all Apple products every month',
-      description: '🍎',
-      logoAlt: 'Grover'
-    },
-    {
-      id: '11',
-      imageSrc: '/images/nike-student.jpg',
-      logo: '/images/logos/nike.png',
-      title: 'Nike Student Discount',
-      description: '👟 Get 10% off on all Nike products',
-      logoAlt: 'Nike'
-    },
-    {
-      id: '12',
-      imageSrc: '/images/spotify-premium.jpg',
-      logo: '/images/logos/spotify.png',
-      title: 'Spotify Premium Student',
-      description: '🎵 50% off Premium for students',
-      logoAlt: 'Spotify'
-    }
-  ];
-
   return (
     <div className="home">
       <Header isLoggedIn={isLoggedIn} />
@@ -218,19 +219,24 @@ function Home({ isLoggedIn }) {
               Show more <span>→</span>
             </button>
           </div>
-          <div className="deals-grid">
-            {featuredDeals.map((deal, index) => (
-              <div key={index} onClick={() => handleHotDealClick(deal.id)} style={{ cursor: 'pointer' }}>
-                <ProductCard
-                  imageSrc={deal.imageSrc}
-                  logo={deal.logo}
-                  title={deal.title}
-                  description={deal.description}
-                  logoAlt={deal.logoAlt}
-                />
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="loading-spinner">Loading deals...</div>
+          ) : (
+            <div className="deals-grid">
+              {featuredOffers.map((offer, index) => (
+                <div key={offer.id || index} onClick={() => handleHotDealClick(offer.id)} style={{ cursor: 'pointer' }}>
+                  <ProductCard
+                    imageSrc={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'}
+                    logo={offer.brand_logo_url ? `http://localhost:5000${offer.brand_logo_url}` : null}
+                    title={offer.title}
+                    description={`${offer.discount_percent}% off`}
+                    logoAlt={offer.brand_name}
+                    brandName={offer.brand_name}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -245,100 +251,74 @@ function Home({ isLoggedIn }) {
             <div className="category-header">
               <div className="category-title-section">
                 <h3>Electronics & Technology</h3>
-                <button className="show-more">
+                <button className="show-more" onClick={() => navigate('/category/electronics')}>
                   Show more <span>→</span>
                 </button>
               </div>
               <p className="category-description">Need a new smartphone, MacBook, or laptop? From Apple to MediaMarkt: We have the best tech deals for students.</p>
             </div>
             
-            <div className="category-offers-grid">
-              <div className="offer-card" onClick={() => navigate('/offer/6')}>
-                <div className="offer-image">
-                  <img src="/images/categories/apple.jpg" alt="Apple" />
-                </div>
-                <div className="offer-content">
-                  <h4>Save with Apple Education Pricing</h4>
-                </div>
+            {loading ? (
+              <div className="loading-spinner">Loading electronics offers...</div>
+            ) : (
+              <div className="category-offers-grid">
+                {electronicsOffers.length > 0 ? (
+                  electronicsOffers.map((offer, index) => (
+                    <div key={offer.id || index} onClick={() => navigate(`/offer/${offer.id}`)} style={{ cursor: 'pointer' }}>
+                      <ProductCard
+                        imageSrc={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'}
+                        logo={offer.brand_logo_url ? `http://localhost:5000${offer.brand_logo_url}` : null}
+                        title={offer.title}
+                        description={`${offer.discount_percent}% off`}
+                        logoAlt={offer.brand_name}
+                        brandName={offer.brand_name}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-offers">
+                    <p>No electronics offers available at the moment. Check back soon!</p>
+                  </div>
+                )}
               </div>
-              
-              <div className="offer-card" onClick={() => navigate('/offer/7')}>
-                <div className="offer-image">
-                  <img src="/images/categories/mediamarkt.jpg" alt="MediaMarkt" />
-                </div>
-                <div className="offer-content">
-                  <h4>Save 10€ on every order of 100€ or more</h4>
-                </div>
-              </div>
-              
-              <div className="offer-card" onClick={() => navigate('/offer/8')}>
-                <div className="offer-image">
-                  <img src="/images/categories/amazon-prime.jpg" alt="Amazon Prime" />
-                </div>
-                <div className="offer-content">
-                  <h4>Prime Student Membership 6 months free for you</h4>
-                </div>
-              </div>
-              
-              <div className="offer-card" onClick={() => navigate('/offer/9')}>
-                <div className="offer-image">
-                  <img src="/images/categories/disney.jpg" alt="Disney+" />
-                </div>
-                <div className="offer-content">
-                  <h4>Save over 15% with an annual subscription*</h4>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
           
           <div className="category-section">
             <div className="category-header">
               <div className="category-title-section">
                 <h3>Fashion</h3>
-                <button className="show-more">
+                <button className="show-more" onClick={() => navigate('/category/fashion')}>
                   Show more <span>→</span>
                 </button>
               </div>
               <p className="category-description">Stay stylish with the best fashion deals for students. From trendy clothing to accessories, find your perfect look for less.</p>
             </div>
             
-            <div className="category-offers-grid">
-              <div className="offer-card" onClick={() => navigate('/offer/2')}>
-                <div className="offer-image">
-                  <img src="/images/categories/hm.jpg" alt="H&M" />
-                </div>
-                <div className="offer-content">
-                  <h4>H&M Student Discount 15% off</h4>
-                </div>
+            {loading ? (
+              <div className="loading-spinner">Loading fashion offers...</div>
+            ) : (
+              <div className="category-offers-grid">
+                {fashionOffers.length > 0 ? (
+                  fashionOffers.map((offer, index) => (
+                    <div key={offer.id || index} onClick={() => navigate(`/offer/${offer.id}`)} style={{ cursor: 'pointer' }}>
+                      <ProductCard
+                        imageSrc={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'}
+                        logo={offer.brand_logo_url ? `http://localhost:5000${offer.brand_logo_url}` : null}
+                        title={offer.title}
+                        description={`${offer.discount_percent}% off`}
+                        logoAlt={offer.brand_name}
+                        brandName={offer.brand_name}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-offers">
+                    <p>No fashion offers available at the moment. Check back soon!</p>
+                  </div>
+                )}
               </div>
-              
-              <div className="offer-card" onClick={() => navigate('/offer/3')}>
-                <div className="offer-image">
-                  <img src="/images/categories/zara.jpg" alt="Zara" />
-                </div>
-                <div className="offer-content">
-                  <h4>Zara Student Discount 10% off all items</h4>
-                </div>
-              </div>
-              
-              <div className="offer-card" onClick={() => navigate('/offer/4')}>
-                <div className="offer-image">
-                  <img src="/images/categories/adidas.jpg" alt="Adidas" />
-                </div>
-                <div className="offer-content">
-                  <h4>Adidas Student Discount 20% off</h4>
-                </div>
-              </div>
-              
-              <div className="offer-card" onClick={() => navigate('/offer/5')}>
-                <div className="offer-image">
-                  <img src="/images/categories/nike-fashion.jpg" alt="Nike" />
-                </div>
-                <div className="offer-content">
-                  <h4>Nike Student Discount 15% off fashion items</h4>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

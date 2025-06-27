@@ -12,17 +12,26 @@ function ProductCard({ id, brand, discount, logo, imageSrc, title, description, 
 
   return (
     <div className="product-card" onClick={handleClick}>
-      {imageSrc && (
-        <div className="card-image">
-          <img src={imageSrc} alt={title || brand} />
+      <div className="card-image">
+        <img src={imageSrc} alt={title || brand} />
+        <div className="brand-logo">
+          {logo ? (
+            <img 
+              src={logo} 
+              alt={logoAlt || brand} 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className="brand-initial" style={{ display: logo ? 'none' : 'flex' }}>
+            {(brand || title || '?').charAt(0).toUpperCase()}
+          </div>
         </div>
-      )}
-      <div className="brand-logo">
-        {logo && <img src={logo} alt={logoAlt || brand} />}
       </div>
       <div className="card-content">
-        <h3 className="brand-name">{title || brand}</h3>
-        <p className="discount">{description || discount}</p>
+        <p className="discount-text">{description || discount}</p>
       </div>
     </div>
   );

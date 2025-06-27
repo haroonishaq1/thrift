@@ -12,6 +12,8 @@ const CREATE_BRANDS_TABLE = `
     admin_username VARCHAR(100) NOT NULL,
     admin_email VARCHAR(255) NOT NULL,
     description TEXT,
+    logo_url VARCHAR(500),
+    category VARCHAR(50) DEFAULT 'other',
     is_approved BOOLEAN DEFAULT FALSE,
     approved_at TIMESTAMP,
     approved_by VARCHAR(100),
@@ -47,22 +49,24 @@ const Brand = {
         website,
         adminUsername,
         adminEmail,
-        description
+        description,
+        logoUrl,
+        category = 'other'
       } = brandData;
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
 
       const query = `
-        INSERT INTO brands (name, email, password, website, admin_username, admin_email, description, is_approved)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, name, email, website, admin_username, admin_email, description, is_approved, created_at
+        INSERT INTO brands (name, email, password, website, admin_username, admin_email, description, logo_url, category, is_approved)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, name, email, website, admin_username, admin_email, description, logo_url, category, is_approved, created_at
       `;
 
-      const values = [name, email, hashedPassword, website, adminUsername, adminEmail, description, false];
+      const values = [name, email, hashedPassword, website, adminUsername, adminEmail, description, logoUrl, category, false];
       const result = await pool.query(query, values);
 
-      console.log(`✅ Brand registered: ${name} (Pending approval)`);
+      console.log(`✅ Brand registered: ${name} (Category: ${category}, Pending approval)`);
       return result.rows[0];
     } catch (error) {
       console.error('❌ Error creating brand:', error.message);
@@ -294,6 +298,23 @@ const Brand = {
       return result.rows[0];
     } catch (error) {
       console.error('❌ Error updating brand password:', error.message);
+      throw error;
+    }
+  },
+
+  // Get brands by category
+  getByCategory: async (category) => {
+    try {
+      const query = `
+        SELECT id, name, email, website, description, category, created_at
+        FROM brands 
+        WHERE is_approved = TRUE AND category = $1
+        ORDER BY created_at DESC
+      `;
+      const result = await pool.query(query, [category]);
+      return result.rows;
+    } catch (error) {
+      console.error('❌ Error getting brands by category:', error.message);
       throw error;
     }
   },
