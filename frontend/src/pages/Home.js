@@ -8,70 +8,118 @@ import ProductCard from '../components/ProductCard';
 import { FaChevronLeft, FaChevronRight, FaFire } from 'react-icons/fa';
 
 function Home({ isLoggedIn }) {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(5); // Start at index 5 (middle of extended array)
+  const [itemsPerView, setItemsPerView] = useState(3);
   const navigate = useNavigate();
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => {
+      const next = prev + 1;
+      // Reset to middle set if we reach the end of extended items
+      if (next >= 15 - 5) { // 15 total items, reset before last 5
+        setTimeout(() => setCurrentSlide(5), 500);
+        return next;
+      }
+      return next;
+    });
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => {
+      const next = prev - 1;
+      // Reset to middle set if we reach the beginning
+      if (next < 0) {
+        setTimeout(() => setCurrentSlide(9), 500); // 15 - 5 - 1
+        return next;
+      }
+      return next;
+    });
+  };
+
+  // Handle responsive items per view
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setItemsPerView(1);
+      } else if (window.innerWidth <= 1024) {
+        setItemsPerView(2);
+      } else {
+        setItemsPerView(3);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate transform distance based on screen size (per card)
+  const getTransformDistance = () => {
+    if (window.innerWidth <= 768) {
+      // Mobile: 1 card per view
+      return window.innerWidth - 60;
+    } else if (window.innerWidth <= 1024) {
+      // Tablet: 2 cards per view  
+      return (window.innerWidth - 80) / 2;
+    } else {
+      // Desktop: 285px card + 20px gap = 305px per card
+      return 305;
+    }
+  };
+
   const carouselItems = [
     {
       id: 1,
+      imageSrc: '/images/carousel/samsung-s25.jpg',
+      title: "The new Galaxy S25 Edge",
+      description: '📱 ✨ Pre-order now and secure benefits.*',
+      brandName: "SAMSUNG",
+      logo: '/images/logos/samsung.png',
+    },
+    {
+      id: 2,
+      imageSrc: '/images/carousel/apple-promo.jpg',
+      title: '15% off all Apple products every month',
+      description: 'Achtung, neue Preise auf Apple-Geräte! 🍎',
+      brandName: 'GROVER',
+      logo: '/images/logos/grover.png',
+    },
+    {
+      id: 4,
+      imageSrc: '/images/carousel/sky-streaming.jpg',
+      title: 'Discover Sky Stream now!',
+      description: 'Entertainment and sports streaming 🏆',
+      brandName: 'SKY',
+      logo: '/images/logos/sky.png',
+    },
+    {
+      id: 5,
       imageSrc: '/images/levis.svg',
       title: "Levi's Exclusive",
       description: '20% student discount on all items',
       brandName: "LEVI'S",
+      logo: '/images/logos/levis.png',
     },
     {
-      id: 2,
+      id: 6,
       imageSrc: '/images/swarovski.svg',
       title: 'Swarovski Collection',
       description: 'Up to 30% off on selected items',
       brandName: 'SWAROVSKI',
-    },
-    {
-      id: 3,
-      imageSrc: '/images/levis.svg',
-      title: "Levi's",
-      description: '20% off on all denim',
-      logo: '/images/logos/levis.png',
-    },
-    {
-      id: 4,
-      imageSrc: '/images/swarovski.svg',
-      title: 'Swarovski',
-      description: '25% student discount on selected items',
       logo: '/images/logos/swarovski.png',
-    },
-    {
-      id: 5,
-      imageSrc: '/images/carousel/wow-sport.jpg',
-      title: 'WOW Sport',
-      description: '40% off annual subscription',
-      logo: '/images/logos/wow.png',
-    },
-    {
-      id: 6,
-      imageSrc: '/images/carousel/sky-streaming.jpg',
-      title: 'Sky Streaming',
-      description: '50% off for students',
-      logo: '/images/logos/sky.png',
     }
   ];
+
+  // Create seamless carousel by duplicating items
+  const extendedCarouselItems = [...carouselItems, ...carouselItems, ...carouselItems];
 
   // Auto-advance carousel
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prevSlide) => 
-        prevSlide === Math.ceil(carouselItems.length / 4) - 1 ? 0 : prevSlide + 1
-      );
+      nextSlide();
     }, 5000);
     return () => clearInterval(timer);
-  }, [carouselItems.length]);
-
-  const nextSlide = () => {
-    setCurrentSlide(currentSlide === Math.ceil(carouselItems.length / 4) - 1 ? 0 : currentSlide + 1);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide(currentSlide === 0 ? Math.ceil(carouselItems.length / 4) - 1 : currentSlide - 1);
-  };
+  }, []);
 
   // Featured deals data
   const featuredDeals = [
@@ -88,13 +136,6 @@ function Home({ isLoggedIn }) {
       title: '15% off all Apple products every month',
       description: '🍎',
       logoAlt: 'Grover'
-    },
-    {
-      imageSrc: '/images/wow-sport.jpg',
-      logo: '/images/logos/wow.png',
-      title: 'WOW Live Sport -40% for only €21.50 per month.',
-      description: '',
-      logoAlt: 'WOW'
     }
   ];
 
@@ -103,42 +144,38 @@ function Home({ isLoggedIn }) {
       <Header isLoggedIn={isLoggedIn} />
       <NavCategories />
       
-      {/* Hero Section with Carousel */}
+      {/* Hero Carousel Section */}
       <section className="hero-carousel">
-        <div className="carousel-container">
-          <div className="carousel-content">
-            <div className="carousel-items" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-              {carouselItems.map((item, index) => (
-                <div key={item.id} className="carousel-item">
-                  <div className="carousel-image">
-                    <img src={item.imageSrc} alt={item.title} />
-                  </div>
-                  <div className="carousel-text">
-                    <h2>{item.title}</h2>
+        <div className="carousel-wrapper">
+          <div className="carousel-viewport">
+            <div className="carousel-track" style={{ transform: `translateX(-${currentSlide * getTransformDistance()}px)` }}>
+            {extendedCarouselItems.map((item, index) => (
+              <div key={`${item.id}-${index}`} className="carousel-card">
+                <div className="card-image">
+                  <img src={item.imageSrc} alt={item.title} />
+                </div>
+                <div className="card-overlay">
+                  <div className="card-content">
+                    <h3>{item.title}</h3>
                     <p>{item.description}</p>
-                    <button 
-                      className="shop-now-btn"
-                      onClick={() => navigate(`/brand/${item.brandName || item.title}`)}
-                    >
-                      Shop Now
-                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-          <button className="carousel-btn prev" onClick={prevSlide}>
+          </div>
+          <button className="nav-btn prev" onClick={prevSlide}>
             <FaChevronLeft />
           </button>
-          <button className="carousel-btn next" onClick={nextSlide}>
+          <button className="nav-btn next" onClick={nextSlide}>
             <FaChevronRight />
           </button>
           <div className="carousel-indicators">
-            {Array.from({ length: Math.ceil(carouselItems.length / 4) }).map((_, index) => (
+            {carouselItems.map((_, index) => (
               <button
                 key={index}
-                className={`indicator ${index === currentSlide ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(index)}
+                className={`indicator ${(currentSlide % 5) === index ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(5 + index)}
               />
             ))}
           </div>
