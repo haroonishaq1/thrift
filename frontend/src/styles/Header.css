@@ -6,15 +6,17 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  margin: 0;
 }
 
 .header-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .menu-icon {
