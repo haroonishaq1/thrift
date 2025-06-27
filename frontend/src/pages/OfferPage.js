@@ -13,7 +13,7 @@ function OfferPage() {
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [error, setError] = useState(null);
   const [rating, setRating] = useState(null);
-  const [showCodeScreen, setShowCodeScreen] = useState(false); // Track which screen to show
+  const [showCodeScreen, setShowCodeScreen] = useState(false);
   
   useEffect(() => {
     try {
@@ -31,9 +31,6 @@ function OfferPage() {
       console.log('Current offer index in category:', currentIndex);
       setCurrentOfferIndex(currentIndex >= 0 ? currentIndex : 0);
       
-      // Reset to first screen when navigating to a new offer
-      setShowCodeScreen(false);
-      
     } catch (err) {
       console.error('Error fetching offer:', err);
       setError("Error fetching offer details. Please try again later.");
@@ -43,8 +40,6 @@ function OfferPage() {
   // Add keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (showCodeScreen) return; // Don't handle keyboard navigation on second screen
-      
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         handlePrevOffer();
@@ -58,14 +53,14 @@ function OfferPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [showCodeScreen]); // Remove dependency on functions to avoid recreation
+  }, []);
 
   const handleRating = (value) => {
     setRating(value);
   };
 
   const handleRedeemNow = () => {
-    setShowCodeScreen(true); // Show the second screen
+    navigate(`/redeem-code/${offerId}`);
   };
 
   const handleShowCode = () => {
@@ -126,7 +121,6 @@ function OfferPage() {
   return (
     <div className="offer-page">
       <Header />
-      
       <div className="offer-page-container">
         {!showCodeScreen ? (
           // First Screen: Carousel-style offer display
@@ -139,7 +133,6 @@ function OfferPage() {
                 </p>
               )}
             </div>
-            
             <div className="offer-carousel-container">
               <button 
                 className="carousel-nav-btn prev-btn" 
@@ -148,7 +141,6 @@ function OfferPage() {
               >
                 <span>&lt;</span>
               </button>
-              
               <div className="offer-carousel-card">
                 <div className="offer-content-wrapper">
                   <div className="offer-brand-section">
@@ -157,24 +149,20 @@ function OfferPage() {
                     </div>
                     <h2 className="brand-name-large">{offerData.brand}</h2>
                   </div>
-                  
                   <div className="offer-text-content">
                     <h3 className="offer-main-title">{offerData.title}</h3>
                     <p className="offer-description-text">{offerData.discount}</p>
                   </div>
-                  
                   <div className="offer-cta-section">
                     <button className="redeem-now-btn" onClick={handleRedeemNow}>
                       Redeem now
                     </button>
                   </div>
                 </div>
-                
                 <div className="offer-image-section">
                   <img src={offerData.image || "/images/placeholder.jpg"} alt={offerData.title} />
                 </div>
               </div>
-              
               <button 
                 className="carousel-nav-btn next-btn" 
                 onClick={handleNextOffer}
@@ -183,70 +171,43 @@ function OfferPage() {
                 <span>&gt;</span>
               </button>
             </div>
-            
-            {categoryOffers.length > 1 && (
-              <div className="carousel-indicators">
-                {categoryOffers.map((_, index) => (
-                  <span 
-                    key={index}
-                    className={`indicator ${index === currentOfferIndex ? 'active' : ''}`}
-                    onClick={() => handleIndicatorClick(index)}
-                  ></span>
-                ))}
-              </div>
-            )}
           </>
         ) : (
-          // Second Screen: Rating and "Show code" (keep existing)
-          <>
-            <div className="offer-header">
-              <div className="offer-brand-logo">
+          // Second Screen: Rating and "Show code" - simplified layout
+          <div className="redeem-screen">
+            <div className="redeem-content">
+              <div className="offer-brand-logo-center">
                 <img src={offerData.logo || "/images/logos/placeholder.png"} alt={offerData.brand} />
               </div>
-              <h1>{offerData.brand}</h1>
-            </div>
-            
-            <div className="offer-content">
-              <div className="offer-details">
-                <h2>{offerData.title}</h2>
-                <p className="offer-description">{offerData.description}</p>
-                
-                <div className="offer-rating">
-                  <p>Rate this offer:</p>
-                  <div className="rating-buttons">
-                    <button 
-                      className={`thumbs-down ${rating === false ? 'active' : ''}`} 
-                      onClick={() => handleRating(false)}
-                    >
-                      👎
-                    </button>
-                    <button 
-                      className={`thumbs-up ${rating === true ? 'active' : ''}`} 
-                      onClick={() => handleRating(true)}
-                    >
-                      👍
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="offer-action">
-                  <p>Enter this code at checkout to get {offerData.title}.</p>
-                  <button className="show-code-btn" onClick={handleShowCode}>
-                    Show code
+              <h1 className="discount-title">{offerData.discount}</h1>
+              <div className="offer-rating">
+                <p>Rate this offer:</p>
+                <div className="rating-buttons">
+                  <button 
+                    className={`thumbs-up ${rating === true ? 'active' : ''}`} 
+                    onClick={() => handleRating(true)}
+                  >
+                    👍
+                  </button>
+                  <button 
+                    className={`thumbs-down ${rating === false ? 'active' : ''}`} 
+                    onClick={() => handleRating(false)}
+                  >
+                    👎
                   </button>
                 </div>
-                
-                <div className="offer-terms">
-                  <h3>Terms & Conditions</h3>
-                  <p>{offerData.termsAndConditions}</p>
-                  <p>Expires: {offerData.expirationDate}</p>
-                </div>
+              </div>
+              <div className="offer-action">
+                <p>Enter this code at checkout to get {offerData.discount}.</p>
+                <p className="visit-website">Get your code now and visit the {offerData.brand} website.</p>
+                <button className="show-code-btn" onClick={handleShowCode}>
+                  Show code
+                </button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
-      
       <Footer />
     </div>
   );

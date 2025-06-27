@@ -196,26 +196,30 @@
   font-weight: 600;
   color: #333;
   text-align: center;
-  min-width: 200px;
+  min-width: 300px;
+  width: 100%;
+  max-width: 400px;
 }
 
 /* Copy Button */
 .copy-btn {
-  background: #28a745;
-  color: white;
-  border: none;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
   padding: 12px 20px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .copy-btn:hover {
-  background: #218838;
+  background: #000000;
+  color: #ffffff;
 }
 
 .copy-btn.copied {
-  background: #17a2b8;
+  background: #000000;
+  color: #ffffff;
 }
 
 /* Open Website Button - Blue to match other buttons */

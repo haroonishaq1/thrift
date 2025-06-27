@@ -144,22 +144,6 @@
   font-size: 14px;
 }
 
-/* Download Banner Styles */
-.download-banner {
-  width: 100%;
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
-}
-
-.download-banner img {
-  width: 100%;
-  height: auto;
-  max-height: 200px;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
 /* Responsive styles */
 @media (max-width: 768px) {
   .footer-nav-top {

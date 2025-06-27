@@ -5,9 +5,6 @@ import { FaTiktok, FaInstagram, FaFacebookF } from 'react-icons/fa';
 function Footer() {
   return (
     <>
-      <div className="download-banner">
-        <img src="/images/download-banner.jpeg" alt="Download the app" />
-      </div>
       <footer className="footer">
         <div className="footer-main">
           <div className="footer-navigation">

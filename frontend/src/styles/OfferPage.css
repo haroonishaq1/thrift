@@ -45,9 +45,11 @@
 
 .offer-page-container {
   width: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-bottom: 40px;
 }
 
 .category-header {
@@ -465,9 +467,16 @@
 /* Carousel Indicators */
 .carousel-indicators {
   display: flex;
-  justify-content: center;
-  margin: 30px 0 50px 0;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 20px auto 30px auto;
   gap: 8px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  padding-left: 150px;
 }
 
 .indicator {
@@ -488,6 +497,119 @@
   background-color: #666;
 }
 
+/* Redeem Screen Styles */
+.redeem-screen {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 60vh;
+}
+
+.redeem-content {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 60px 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.offer-brand-logo-center {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  background-color: #000;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 30px auto;
+}
+
+.offer-brand-logo-center img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.discount-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 40px 0;
+  text-align: center;
+}
+
+.redeem-content .offer-rating {
+  margin: 40px 0;
+}
+
+.redeem-content .offer-rating p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.redeem-content .rating-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.redeem-content .rating-buttons button {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.redeem-content .rating-buttons button:hover {
+  transform: scale(1.1);
+}
+
+.redeem-content .rating-buttons button.active {
+  background-color: #f0f0f0;
+}
+
+.redeem-content .offer-action {
+  margin-top: 40px;
+}
+
+.redeem-content .offer-action p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.visit-website {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 30px !important;
+}
+
+.redeem-content .show-code-btn {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 200px;
+}
+
+.redeem-content .show-code-btn:hover {
+  background-color: #3367d6;
+}
+
 @media (max-width: 600px) {
   .offer-container {
     padding: 20px 15px;
@@ -499,5 +621,19 @@
   
   .offer-details h2 {
     font-size: 26px;
+  }
+  
+  .redeem-content {
+    padding: 40px 20px;
+    margin: 20px;
+  }
+  
+  .discount-title {
+    font-size: 28px;
+  }
+  
+  .offer-brand-logo-center {
+    width: 100px;
+    height: 100px;
   }
 }
