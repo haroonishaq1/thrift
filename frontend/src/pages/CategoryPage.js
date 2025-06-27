@@ -1,51 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import '../styles/CategoryPage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import NavCategories from '../components/NavCategories';
-import { getProductsByCategory } from '../services/mockData';
+import { getOffersByCategory, getHotDealsOffers } from '../services/offerData';
 
 function CategoryPage() {
   const { category } = useParams();
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [products, setProducts] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchOffers = async () => {
       setLoading(true);
       try {
-        const result = await getProductsByCategory(category, 1);
-        setProducts(result.products);
-        setHasMore(result.hasMore);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        let categoryOffers;
+        if (category === 'hot-deals') {
+          categoryOffers = getHotDealsOffers();
+        } else {
+          categoryOffers = getOffersByCategory(category);
+        }
+        
+        setOffers(categoryOffers);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching offers:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
-    setPage(1);
+    fetchOffers();
   }, [category]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % products.length);
+    setCurrentSlide((prev) => (prev + 1) % offers.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + products.length) % products.length);
+    setCurrentSlide((prev) => (prev - 1 + offers.length) % offers.length);
   };
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
 
-  if (loading && products.length === 0) {
+  const handleRedeemClick = (offerId) => {
+    navigate(`/offer/${offerId}`);
+  };
+
+  if (loading && offers.length === 0) {
     return (
       <div className="loading-container">
         <div className="loading">Loading...</div>
@@ -59,12 +69,12 @@ function CategoryPage() {
       <NavCategories />
       <main className="category-content">
         <h1 className="category-title">
-          {category.charAt(0).toUpperCase() + category.slice(1)}
+          {category === 'hot-deals' ? 'Hot Deals' : category.charAt(0).toUpperCase() + category.slice(1)}
         </h1>
         
         {/* Category Carousel */}
         <section className="category-carousel">
-          {products.length > 0 && (
+          {offers.length > 0 && (
             <>
               <button 
                 className="carousel-btn prev" 
@@ -74,32 +84,39 @@ function CategoryPage() {
                 <FaChevronLeft />
               </button>
               
-              <div className="carousel-container">
-                {products.map((product, index) => (
-                  <div 
-                    key={product.id} 
-                    className={`carousel-slide ${index === currentSlide ? 'active' : ''}`}
-                    style={{
-                      transform: `translateX(${(index - currentSlide) * 100}%)`
-                    }}
-                  >
-                    <div className="slide-content">
-                      <div className="brand-logo">
-                        <img src={product.logo} alt={product.brand} />
+              <div className="carousel-viewport">
+                <div 
+                  className="carousel-track"
+                  style={{
+                    transform: `translateX(-${currentSlide * 100}%)`
+                  }}
+                >
+                  {offers.map((offer, index) => (
+                    <div 
+                      key={offer.id} 
+                      className="carousel-slide"
+                    >
+                      <div className="slide-content">
+                        <div className="brand-logo">
+                          <img src={offer.logo} alt={offer.brand} />
+                        </div>
+                        <div className="slide-info">
+                          <h2 className="discount-text">{offer.discount}</h2>
+                          <p className="description">{offer.description}</p>
+                        </div>
+                        <div className="slide-image">
+                          <img src={offer.image} alt={offer.title} />
+                        </div>
+                        <button 
+                          className="redeem-btn"
+                          onClick={() => handleRedeemClick(offer.id)}
+                        >
+                          Redeem now
+                        </button>
                       </div>
-                      <div className="slide-info">
-                        <h2 className="discount-text">{product.discount}</h2>
-                        <p className="description">{product.description}</p>
-                      </div>
-                      <div className="slide-image">
-                        <img src={product.image} alt={product.title} />
-                      </div>
-                      <button className="redeem-btn">
-                        Redeem now
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
               
               <button 
@@ -111,7 +128,7 @@ function CategoryPage() {
               </button>
 
               <div className="carousel-dots">
-                {products.map((_, index) => (
+                {offers.map((_, index) => (
                   <button
                     key={index}
                     className={`carousel-dot ${index === currentSlide ? 'active' : ''}`}

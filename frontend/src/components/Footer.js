@@ -5,6 +5,9 @@ import { FaTiktok, FaInstagram, FaFacebookF } from 'react-icons/fa';
 function Footer() {
   return (
     <>
+      <div className="download-banner">
+        <img src="/images/download-banner.jpeg" alt="Download the app" />
+      </div>
       <footer className="footer">
         <div className="footer-main">
           <div className="footer-navigation">
@@ -20,6 +23,25 @@ function Footer() {
                 <a href="https://tiktok.com" aria-label="TikTok"><FaTiktok /></a>
                 <a href="https://instagram.com" aria-label="Instagram"><FaInstagram /></a>
                 <a href="https://facebook.com" aria-label="Facebook"><FaFacebookF /></a>
+              </div>
+            </div>
+            
+            <div className="footer-app-section">
+              <div className="footer-app-logo">
+                <div className="unidays-logo">T</div>
+              </div>
+              <div className="footer-app-stores">
+                <a href="https://apps.apple.com" className="app-store-badge">
+                  <img src="/images/app-store-badge.png" alt="Download on App Store" />
+                </a>
+                <a href="https://play.google.com" className="play-store-badge">
+                  <img src="/images/play-store-badge.png" alt="Get it on Google Play" />
+                </a>
+              </div>
+              <div className="footer-app-rating">
+                <div className="rating-number">4.8</div>
+                <div className="rating-stars">★ ★ ★ ★ ★</div>
+                <div className="rating-count">36k reviews</div>
               </div>
             </div>
             

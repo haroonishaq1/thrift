@@ -116,6 +116,167 @@ const mockOffers = [
     reviews: 623,
     redemptionUrl: 'https://smartbuyglasses.com/student',
     promoCode: 'STUDENT20'
+  },
+  {
+    id: '6',
+    brand: 'Apple',
+    title: 'Apple Education Pricing',
+    description: 'Save with Apple Education Pricing on Mac and iPad',
+    discount: 'Up to £150 off + Free AirPods',
+    type: 'Online',
+    category: 'Technology',
+    image: '/images/categories/apple.jpg',
+    logo: '/images/logos/apple.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student ID required',
+      'Free AirPods with eligible Mac or iPad purchase',
+      'Education pricing available',
+      'Cannot be combined with other offers',
+      'Valid until December 31, 2025'
+    ],
+    rating: 4.9,
+    reviews: 2341,
+    redemptionUrl: 'https://apple.com/education',
+    promoCode: 'EDUCATION'
+  },
+  {
+    id: '7',
+    brand: 'MediaMarkt',
+    title: 'MediaMarkt Student Savings',
+    description: 'Save 10€ on every order of 100€ or more',
+    discount: '10€ off orders over 100€',
+    type: 'Online',
+    category: 'Technology',
+    image: '/images/categories/mediamarkt.jpg',
+    logo: '/images/logos/mediamarkt.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student ID required',
+      'Minimum order value 100€',
+      '10€ discount automatically applied',
+      'Valid on technology products',
+      'Valid until December 31, 2025'
+    ],
+    rating: 4.3,
+    reviews: 1567,
+    redemptionUrl: 'https://mediamarkt.com/student',
+    promoCode: 'STUDENT10'
+  },
+  {
+    id: '8',
+    brand: 'Amazon Prime',
+    title: 'Prime Student Membership',
+    description: 'Prime Student Membership 6 months free for you',
+    discount: '6 months free + 50% off thereafter',
+    type: 'Online',
+    category: 'Technology',
+    image: '/images/categories/amazon-prime.jpg',
+    logo: '/images/logos/amazon.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student email required',
+      '6 months free trial',
+      '50% off regular Prime price after trial',
+      'Access to Prime Video, Music, and more',
+      'Free shipping benefits included'
+    ],
+    rating: 4.8,
+    reviews: 8934,
+    redemptionUrl: 'https://amazon.com/prime/student',
+    promoCode: 'PRIMESTUDENT'
+  },
+  {
+    id: '9',
+    brand: 'Disney+',
+    title: 'Disney+ Annual Subscription',
+    description: 'Save over 15% with an annual subscription',
+    discount: '15% off annual subscription',
+    type: 'Online',
+    category: 'Technology',
+    image: '/images/categories/disney.jpg',
+    logo: '/images/logos/disney.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student ID required',
+      'Annual subscription only',
+      '15% discount applied at checkout',
+      'Access to Disney, Pixar, Marvel, Star Wars',
+      'Valid until December 31, 2025'
+    ],
+    rating: 4.7,
+    reviews: 3456,
+    redemptionUrl: 'https://disneyplus.com/student',
+    promoCode: 'STUDENT15'
+  },
+  {
+    id: '10',
+    brand: 'Grover',
+    title: '15% off all Apple products every month',
+    description: 'Monthly subscription service for Apple products',
+    discount: '15% off monthly subscriptions',
+    type: 'Online',
+    category: 'Technology',
+    image: '/images/grover-apple.jpg',
+    logo: '/images/logos/grover.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student ID required',
+      'Monthly subscription service',
+      '15% discount on all plans',
+      'Latest Apple products available',
+      'Flexible terms and upgrades'
+    ],
+    rating: 4.5,
+    reviews: 2134,
+    redemptionUrl: 'https://grover.com/student',
+    promoCode: 'APPLESTUDENT15'
+  },
+  {
+    id: '11',
+    brand: 'Nike',
+    title: 'Nike Student Discount',
+    description: 'Get 10% off on all Nike products with student verification',
+    discount: '10% off all products',
+    type: 'Online',
+    category: 'Fashion',
+    image: '/images/nike-student.jpg',
+    logo: '/images/logos/nike.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student ID required',
+      '10% discount on all Nike products',
+      'Free shipping on orders over £50',
+      'Cannot be combined with other offers',
+      'Valid until December 31, 2025'
+    ],
+    rating: 4.6,
+    reviews: 5678,
+    redemptionUrl: 'https://nike.com/student',
+    promoCode: 'NIKESTUDENT10'
+  },
+  {
+    id: '12',
+    brand: 'Spotify',
+    title: 'Spotify Premium Student',
+    description: 'Premium music streaming at student price',
+    discount: '50% off Premium subscription',
+    type: 'Online',
+    category: 'Technology',
+    image: '/images/spotify-premium.jpg',
+    logo: '/images/logos/spotify.png',
+    validUntil: '2025-12-31',
+    terms: [
+      'Valid student ID required',
+      '50% off Premium monthly subscription',
+      'Ad-free music streaming',
+      'Offline downloads available',
+      'Must verify student status annually'
+    ],
+    rating: 4.8,
+    reviews: 12456,
+    redemptionUrl: 'https://spotify.com/student',
+    promoCode: 'SPOTIFYSTUDENT'
   }
 ];
 
@@ -162,6 +323,12 @@ export const getOffersByCategory = (category) => {
   return mockOffers.filter(offer => 
     offer.category.toLowerCase() === category.toLowerCase()
   );
+};
+
+export const getHotDealsOffers = () => {
+  // Return the specific offers that are featured as Hot Deals
+  const hotDealIds = ['1', '10', '11', '12']; // Samsung, Grover, Nike, Spotify
+  return mockOffers.filter(offer => hotDealIds.includes(offer.id));
 };
 
 export const getOffersByBrand = (brandName) => {

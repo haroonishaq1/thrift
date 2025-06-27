@@ -67,6 +67,11 @@ function Home({ isLoggedIn }) {
     }
   };
 
+  // Handle hot deals card click
+  const handleHotDealClick = (dealId) => {
+    navigate(`/offer/${dealId}`);
+  };
+
   const carouselItems = [
     {
       id: 1,
@@ -124,6 +129,7 @@ function Home({ isLoggedIn }) {
   // Featured deals data
   const featuredDeals = [
     {
+      id: '1',
       imageSrc: '/images/samsung-s25.jpg',
       logo: '/images/logos/samsung.png',
       title: 'The new Galaxy S25 Edge',
@@ -131,6 +137,7 @@ function Home({ isLoggedIn }) {
       logoAlt: 'Samsung'
     },
     {
+      id: '10',
       imageSrc: '/images/grover-apple.jpg',
       logo: '/images/logos/grover.png',
       title: '15% off all Apple products every month',
@@ -138,6 +145,7 @@ function Home({ isLoggedIn }) {
       logoAlt: 'Grover'
     },
     {
+      id: '11',
       imageSrc: '/images/nike-student.jpg',
       logo: '/images/logos/nike.png',
       title: 'Nike Student Discount',
@@ -145,6 +153,7 @@ function Home({ isLoggedIn }) {
       logoAlt: 'Nike'
     },
     {
+      id: '12',
       imageSrc: '/images/spotify-premium.jpg',
       logo: '/images/logos/spotify.png',
       title: 'Spotify Premium Student',
@@ -211,14 +220,15 @@ function Home({ isLoggedIn }) {
           </div>
           <div className="deals-grid">
             {featuredDeals.map((deal, index) => (
-              <ProductCard
-                key={index}
-                imageSrc={deal.imageSrc}
-                logo={deal.logo}
-                title={deal.title}
-                description={deal.description}
-                logoAlt={deal.logoAlt}
-              />
+              <div key={index} onClick={() => handleHotDealClick(deal.id)} style={{ cursor: 'pointer' }}>
+                <ProductCard
+                  imageSrc={deal.imageSrc}
+                  logo={deal.logo}
+                  title={deal.title}
+                  description={deal.description}
+                  logoAlt={deal.logoAlt}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -243,7 +253,7 @@ function Home({ isLoggedIn }) {
             </div>
             
             <div className="category-offers-grid">
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/6')}>
                 <div className="offer-image">
                   <img src="/images/categories/apple.jpg" alt="Apple" />
                 </div>
@@ -252,7 +262,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
               
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/7')}>
                 <div className="offer-image">
                   <img src="/images/categories/mediamarkt.jpg" alt="MediaMarkt" />
                 </div>
@@ -261,7 +271,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
               
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/8')}>
                 <div className="offer-image">
                   <img src="/images/categories/amazon-prime.jpg" alt="Amazon Prime" />
                 </div>
@@ -270,7 +280,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
               
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/9')}>
                 <div className="offer-image">
                   <img src="/images/categories/disney.jpg" alt="Disney+" />
                 </div>
@@ -293,7 +303,7 @@ function Home({ isLoggedIn }) {
             </div>
             
             <div className="category-offers-grid">
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/2')}>
                 <div className="offer-image">
                   <img src="/images/categories/hm.jpg" alt="H&M" />
                 </div>
@@ -302,7 +312,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
               
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/3')}>
                 <div className="offer-image">
                   <img src="/images/categories/zara.jpg" alt="Zara" />
                 </div>
@@ -311,7 +321,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
               
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/4')}>
                 <div className="offer-image">
                   <img src="/images/categories/adidas.jpg" alt="Adidas" />
                 </div>
@@ -320,7 +330,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
               
-              <div className="offer-card">
+              <div className="offer-card" onClick={() => navigate('/offer/5')}>
                 <div className="offer-image">
                   <img src="/images/categories/nike-fashion.jpg" alt="Nike" />
                 </div>

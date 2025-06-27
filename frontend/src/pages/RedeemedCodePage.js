@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import '../styles/RedeemedCodePage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -7,61 +7,72 @@ import { getOfferById } from '../services/offerData';
 
 function RedeemedCodePage() {
   const { offerId } = useParams();
-  const navigate = useNavigate();
-  const [offerData, setOfferData] = useState(null);
-  const [error, setError] = useState(null);
+  const [offer, setOffer] = useState(null);
+  const [showCode, setShowCode] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [rating, setRating] = useState(null);
   const [copied, setCopied] = useState(false);
-  
+  const [userRating, setUserRating] = useState(null);
+
   useEffect(() => {
-    // Simulate API fetch with timeout
-    setTimeout(() => {
+    const fetchOffer = () => {
       try {
-        const data = getOfferById(offerId);
-        setOfferData(data);
-      } catch (err) {
-        setError("Error fetching offer details. Please try again later.");
+        const offerData = getOfferById(offerId);
+        setOffer(offerData);
+        
+        // Generate a code
+        const code = `${offerData.brand.substring(0, 4).toUpperCase()}-STUD-${Math.floor(Math.random() * 10000)}`;
+        setGeneratedCode(code);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching offer:', error);
+        setLoading(false);
       }
-    }, 500);
+    };
+
+    fetchOffer();
   }, [offerId]);
 
-  const handleCopyCode = () => {
-    if (offerData && offerData.code) {
-      navigator.clipboard.writeText(offerData.code)
-        .then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 3000);
-        })
-        .catch(err => {
-          console.error('Failed to copy: ', err);
-        });
-    }
+  const handleShowCode = () => {
+    setShowCode(true);
+  };
+
+  const handleRating = (type) => {
+    setUserRating(type);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleOpenWebsite = () => {
-    if (offerData && offerData.websiteUrl) {
-      window.open(offerData.websiteUrl, '_blank');
+    if (offer?.redemptionUrl) {
+      window.open(offer.redemptionUrl, '_blank');
     }
   };
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="redeemed-code-page">
+      <div className="redeemed-page">
         <Header />
-        <div className="error-message">
-          {error}
+        <div className="loading-container">
+          <div className="loading">Loading...</div>
         </div>
         <Footer />
       </div>
     );
   }
 
-  if (!offerData) {
+  if (!offer) {
     return (
-      <div className="redeemed-code-page">
+      <div className="redeemed-page">
         <Header />
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading your discount code...</p>
+        <div className="error-container">
+          <div className="error">Offer not found</div>
         </div>
         <Footer />
       </div>
@@ -69,39 +80,83 @@ function RedeemedCodePage() {
   }
 
   return (
-    <div className="redeemed-code-page">
+    <div className="redeemed-page">
       <Header />
       
-      <div className="redeemed-container">
-        <h1>{offerData.title}</h1>
-        
-        <div className="rate-offer">
-          <p>Rate this offer:</p>
-          <div className="rating-buttons">
-            <button className="thumbs-down">👎</button>
-            <button className="thumbs-up">👍</button>
-          </div>
+      <div className="redeemed-main">
+        {/* Brand Logo - Above and outside the card */}
+        <div className="brand-logo-container">
+          <img src={offer.logo} alt={offer.brand} className="brand-logo" />
         </div>
         
-        <p className="instruction-text">{offerData.description}</p>
-        
-        <div className="code-display">
-          <div className="code-text">{offerData.code}</div>
-          <button 
-            className={`copy-btn ${copied ? 'copied' : ''}`} 
-            onClick={handleCopyCode}
-          >
-            {copied ? 'Copied' : 'Copy'}
-          </button>
+        <div className="redeemed-container">
+          {!showCode ? (
+            <div className="redeemed-card">
+              {/* Large Discount Text */}
+              <h1 className="discount-title">15% discount</h1>
+              
+              {/* Rating Section */}
+              <div className="rating-section">
+                <p className="rate-text">Rate this offer:</p>
+                <div className="rating-buttons">
+                  <button 
+                    className={`rating-btn thumbs-up ${userRating === 'up' ? 'active' : ''}`}
+                    onClick={() => handleRating('up')}
+                  >
+                    👍
+                  </button>
+                  <button 
+                    className={`rating-btn thumbs-down ${userRating === 'down' ? 'active' : ''}`}
+                    onClick={() => handleRating('down')}
+                  >
+                    👎
+                  </button>
+                </div>
+              </div>
+              
+              {/* Instruction Text */}
+              <p className="instruction-text">
+                Enter this code at checkout to get 15% off.
+              </p>
+              
+              {/* Additional Text */}
+              <p className="additional-text">
+                Get your code now and visit the Phase Eight website .
+              </p>
+              
+              {/* Show Code Button */}
+              <button className="show-code-btn" onClick={handleShowCode}>
+                Show code
+              </button>
+            </div>
+          ) : (
+            <div className="redeemed-card">
+              {/* Discount Text */}
+              <h2 className="discount-subtitle">{offer.discount}</h2>
+              
+              {/* Code Display */}
+              <div className="code-container">
+                <input 
+                  type="text" 
+                  value={generatedCode} 
+                  readOnly 
+                  className="code-field"
+                />
+                <button 
+                  className={`copy-btn ${copied ? 'copied' : ''}`}
+                  onClick={handleCopy}
+                >
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              
+              {/* Open Website Button */}
+              <button className="open-website-btn" onClick={handleOpenWebsite}>
+                Open website
+              </button>
+            </div>
+          )}
         </div>
-        
-        <div className="terms-note">
-          <p>{offerData.termsAndConditions}</p>
-        </div>
-        
-        <button className="open-website-btn" onClick={handleOpenWebsite}>
-          Open website
-        </button>
       </div>
       
       <Footer />

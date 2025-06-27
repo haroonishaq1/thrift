@@ -38,37 +38,51 @@
 .category-carousel {
   position: relative;
   margin: 0 auto 40px;
-  max-width: 1000px;
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 80px;
 }
 
-.carousel-container {
+.carousel-viewport {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 20px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: 480px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 .carousel-slide {
-  position: absolute;
   width: 100%;
-  height: 100%;
-  transition: transform 0.5s ease-in-out;
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .slide-content {
   position: relative;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 32px;
+  min-height: 500px;
+  height: auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .brand-logo {
   position: absolute;
-  top: 32px;
-  left: 32px;
+  top: 40px;
+  left: 40px;
   width: 80px;
   height: 80px;
   background: white;
@@ -76,7 +90,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 2;
 }
 
@@ -87,21 +101,61 @@
 }
 
 .slide-info {
-  padding-top: 40px;
-  padding-left: 120px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 0;
+  max-width: 50%;
 }
 
 .discount-text {
-  font-size: 32px;
-  font-weight: 600;
-  margin: 0 0 16px;
-  color: #333;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: #000;
+  line-height: 1.2;
 }
 
 .description {
   font-size: 18px;
   color: #666;
-  margin: 0;
+  margin: 0 0 30px;
+  line-height: 1.5;
+}
+
+.slide-image {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 50%;
+}
+
+.slide-image img {
+  max-width: 100%;
+  max-height: 350px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.redeem-btn {
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.redeem-btn:hover {
+  background: #3367d6;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
 }
 
 .slide-image {
@@ -111,12 +165,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
 }
 
 .slide-image img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.carousel-slide:hover .slide-image img {
+  transform: scale(1.02);
 }
 
 .redeem-btn {
@@ -142,30 +202,39 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 2;
-  transition: all 0.3s;
+  z-index: 10;
+  transition: all 0.3s ease;
+  font-size: 24px;
+  color: #333;
+  backdrop-filter: blur(10px);
 }
 
 .carousel-btn.prev {
-  left: -24px;
+  left: 20px;
 }
 
 .carousel-btn.next {
-  right: -24px;
+  right: 20px;
 }
 
 .carousel-btn:hover {
-  background: #f0f0f0;
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-btn:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 .carousel-dots {
@@ -174,24 +243,30 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
-  z-index: 2;
+  gap: 12px;
+  z-index: 3;
 }
 
 .carousel-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.8);
   padding: 0;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .carousel-dot.active {
   background: #4169e1;
+  border-color: #4169e1;
   transform: scale(1.2);
+}
+
+.carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.1);
 }
 
 .loading-indicator {
@@ -203,29 +278,67 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .category-carousel {
-    margin: 0 24px 40px;
+    margin: 0 20px 40px;
+    max-width: calc(100% - 40px);
+  }
+  
+  .carousel-container {
+    width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .carousel-container {
-    height: auto;
-    aspect-ratio: 4/5;
+  .category-carousel {
+    padding: 0 40px;
   }
 
   .slide-content {
-    padding: 24px;
+    flex-direction: column;
+    text-align: center;
+    height: auto;
+    min-height: 400px;
+    padding: 40px 20px;
   }
 
   .brand-logo {
-    width: 60px;
-    height: 60px;
-    top: 24px;
-    left: 24px;
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-bottom: 20px;
   }
 
   .slide-info {
-    padding-left: 88px;
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .slide-image {
+    max-width: 100%;
+  }
+
+  .carousel-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .carousel-btn.prev {
+    left: 10px;
+  }
+
+  .carousel-btn.next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-carousel {
+    padding: 0 20px;
+  }
+
+  .slide-content {
+    padding: 30px 15px;
+    min-height: 350px;
   }
 
   .discount-text {
@@ -239,43 +352,14 @@
   .carousel-btn {
     width: 40px;
     height: 40px;
+    font-size: 18px;
   }
 
   .carousel-btn.prev {
-    left: -20px;
+    left: 5px;
   }
 
   .carousel-btn.next {
-    right: -20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .category-carousel {
-    margin: 0 16px 32px;
-  }
-
-  .slide-content {
-    padding: 16px;
-  }
-
-  .brand-logo {
-    width: 48px;
-    height: 48px;
-    top: 16px;
-    left: 16px;
-  }
-
-  .slide-info {
-    padding-left: 64px;
-    padding-top: 24px;
-  }
-
-  .discount-text {
-    font-size: 20px;
-  }
-
-  .carousel-btn {
-    display: none;
+    right: 5px;
   }
 }

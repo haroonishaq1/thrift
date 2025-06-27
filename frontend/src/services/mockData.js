@@ -2,25 +2,16 @@
 const mockProducts = {
   fashion: [
     {
-      id: 1,
-      brand: "Persol",
-      title: "Premium Sunglasses",
-      description: "Enjoy your student discount at Persol!",
-      image: "/images/carousel/persol-sunglasses.jpg",
-      logo: "/images/logos/persol.png",
-      discount: "20% student discount"
-    },
-    {
-      id: 2,
+      id: '2',
       brand: "ARMEDANGELS",
-      title: "Sustainable Fashion",
+      title: "Sustainable Fashion Collection",
       description: "Premium eco-friendly clothing for conscious consumers",
       image: "/images/armedangels.jpg",
       logo: "/images/logos/armedangels.png",
       discount: "Up to 20% off"
     },
     {
-      id: 3,
+      id: '3',
       brand: "BOSS",
       title: "Premium Collection",
       description: "Luxury fashion at student prices",
@@ -29,42 +20,69 @@ const mockProducts = {
       discount: "25% Student Discount"
     },
     {
-      id: 4,
+      id: '4',
       brand: "MISSOMA",
       title: "Jewelry Collection",
-      description: "Handcrafted jewelry pieces",
+      description: "Handcrafted jewelry pieces with student discount",
       image: "/images/missoma.jpg",
       logo: "/images/logos/missoma.png",
       discount: "15% off + Free Shipping"
+    },
+    {
+      id: '5',
+      brand: "SmartBuyGlasses",
+      title: "Designer Eyewear",
+      description: "Premium sunglasses and prescription glasses",
+      image: "/images/smartbuyglasses.jpg",
+      logo: "/images/logos/smartbuyglasses.png",
+      discount: "20% student discount"
     }
   ],
   technology: [
     {
-      id: 5,
+      id: '1',
       brand: "Samsung",
-      title: "Samsung Galaxy S25",
-      description: "Pre-order the latest innovation",
+      title: "Samsung Galaxy S25 Pre-order",
+      description: "Get the latest Samsung Galaxy S25 with student discount",
       image: "/images/carousel/samsung-s25.jpg",
       logo: "/images/logos/samsung.png",
       discount: "£150 off + Free Galaxy Buds"
     },
     {
-      id: 6,
+      id: '6',
       brand: "Apple",
-      title: "Student Apple Store",
-      description: "Special pricing on Mac and iPad",
-      image: "/images/carousel/apple-promo.jpg",
+      title: "Apple Education Pricing",
+      description: "Save with Apple Education Pricing on Mac and iPad",
+      image: "/images/categories/apple.jpg",
       logo: "/images/logos/apple.png",
       discount: "Up to £150 off + Free AirPods"
     },
     {
-      id: 7,
-      brand: "Sky",
-      title: "Sky Stream & Netflix",
-      description: "Entertainment bundle for students",
-      image: "/images/carousel/sky-streaming.jpg",
-      logo: "/images/logos/sky.png",
-      discount: "25% off for 12 months"
+      id: '7',
+      brand: "MediaMarkt",
+      title: "MediaMarkt Student Savings",
+      description: "Save 10€ on every order of 100€ or more",
+      image: "/images/categories/mediamarkt.jpg",
+      logo: "/images/logos/mediamarkt.png",
+      discount: "10€ off orders over 100€"
+    },
+    {
+      id: '8',
+      brand: "Amazon Prime",
+      title: "Prime Student Membership",
+      description: "Prime Student Membership 6 months free for you",
+      image: "/images/categories/amazon-prime.jpg",
+      logo: "/images/logos/amazon.png",
+      discount: "6 months free + 50% off thereafter"
+    },
+    {
+      id: '9',
+      brand: "Disney+",
+      title: "Disney+ Annual Subscription",
+      description: "Save over 15% with an annual subscription",
+      image: "/images/categories/disney.jpg",
+      logo: "/images/logos/disney.png",
+      discount: "15% off annual subscription"
     }
   ]
 };
