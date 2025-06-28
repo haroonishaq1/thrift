@@ -227,11 +227,11 @@ function Home({ isLoggedIn }) {
                 <div key={offer.id || index} onClick={() => handleHotDealClick(offer.id)} style={{ cursor: 'pointer' }}>
                   <ProductCard
                     imageSrc={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'}
-                    logo={offer.brand_logo_url ? `http://localhost:5000${offer.brand_logo_url}` : null}
+                    logo={offer.brand_logo ? `http://localhost:5000${offer.brand_logo}` : null}
+                    brand={offer.brand_name}
                     title={offer.title}
                     description={`${offer.discount_percent}% off`}
                     logoAlt={offer.brand_name}
-                    brandName={offer.brand_name}
                   />
                 </div>
               ))}
@@ -267,11 +267,11 @@ function Home({ isLoggedIn }) {
                     <div key={offer.id || index} onClick={() => navigate(`/offer/${offer.id}`)} style={{ cursor: 'pointer' }}>
                       <ProductCard
                         imageSrc={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'}
-                        logo={offer.brand_logo_url ? `http://localhost:5000${offer.brand_logo_url}` : null}
+                        logo={offer.brand_logo ? `http://localhost:5000${offer.brand_logo}` : null}
+                        brand={offer.brand_name}
                         title={offer.title}
                         description={`${offer.discount_percent}% off`}
                         logoAlt={offer.brand_name}
-                        brandName={offer.brand_name}
                       />
                     </div>
                   ))
@@ -304,11 +304,11 @@ function Home({ isLoggedIn }) {
                     <div key={offer.id || index} onClick={() => navigate(`/offer/${offer.id}`)} style={{ cursor: 'pointer' }}>
                       <ProductCard
                         imageSrc={offer.image_url ? `http://localhost:5000${offer.image_url}` : '/images/placeholder.jpg'}
-                        logo={offer.brand_logo_url ? `http://localhost:5000${offer.brand_logo_url}` : null}
+                        logo={offer.brand_logo ? `http://localhost:5000${offer.brand_logo}` : null}
+                        brand={offer.brand_name}
                         title={offer.title}
                         description={`${offer.discount_percent}% off`}
                         logoAlt={offer.brand_name}
-                        brandName={offer.brand_name}
                       />
                     </div>
                   ))

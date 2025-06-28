@@ -79,7 +79,7 @@ const Offer = {
   findById: async (id) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name, b.email as brand_email
+        SELECT o.*, b.name as brand_name, b.email as brand_email, b.logo as brand_logo
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE o.id = $1
@@ -96,7 +96,7 @@ const Offer = {
   getAll: async (filters = {}) => {
     try {
       let query = `
-        SELECT o.*, b.name as brand_name, b.email as brand_email
+        SELECT o.*, b.name as brand_name, b.email as brand_email, b.logo as brand_logo
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE 1=1
@@ -151,7 +151,7 @@ const Offer = {
   getByBrandId: async (brandId) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name
+        SELECT o.*, b.name as brand_name, b.logo as brand_logo
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE o.brand_id = $1
@@ -249,7 +249,7 @@ const Offer = {
   search: async (searchTerm) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name
+        SELECT o.*, b.name as brand_name, b.logo as brand_logo
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE (o.title ILIKE $1 OR o.description ILIKE $1 OR b.name ILIKE $1)
@@ -269,7 +269,7 @@ const Offer = {
   getFeatured: async (limit = 4) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name, b.logo_url as brand_logo_url
+        SELECT o.*, b.name as brand_name, b.logo as brand_logo
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE o.status = 'active' 
@@ -289,7 +289,7 @@ const Offer = {
   getByCategory: async (category) => {
     try {
       const query = `
-        SELECT o.*, b.name as brand_name, b.logo_url as brand_logo_url
+        SELECT o.*, b.name as brand_name, b.logo as brand_logo
         FROM offers o
         LEFT JOIN brands b ON o.brand_id = b.id
         WHERE o.category = $1 

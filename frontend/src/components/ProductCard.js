@@ -12,26 +12,33 @@ function ProductCard({ id, brand, discount, logo, imageSrc, title, description, 
 
   return (
     <div className="product-card" onClick={handleClick}>
-      <div className="card-image">
-        <img src={imageSrc} alt={title || brand} />
-        <div className="brand-logo">
-          {logo ? (
-            <img 
-              src={logo} 
-              alt={logoAlt || brand} 
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-          ) : null}
-          <div className="brand-initial" style={{ display: logo ? 'none' : 'flex' }}>
+      <div className="card-image-container">
+        <img src={imageSrc} alt={title || brand} className="main-image" />
+        <div className="brand-logo-overlay">
+          <img 
+            src={logo} 
+            alt={logoAlt || brand} 
+            className="brand-logo-img"
+            style={{ display: logo && logo.trim() ? 'block' : 'none' }}
+            onError={(e) => {
+              // If logo fails to load, hide the img and show the brand initial
+              console.log('Logo failed to load:', logo);
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'flex';
+            }}
+            onLoad={(e) => {
+              console.log('Logo loaded successfully:', logo);
+            }}
+          />
+          <div className="brand-initial" style={{ display: (logo && logo.trim()) ? 'none' : 'flex' }}>
             {(brand || title || '?').charAt(0).toUpperCase()}
           </div>
         </div>
       </div>
-      <div className="card-content">
-        <p className="discount-text">{description || discount}</p>
+      <div className="card-info">
+        <div className="discount-badge">
+          {description || discount}
+        </div>
       </div>
     </div>
   );

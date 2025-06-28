@@ -98,35 +98,27 @@ function BrandRegisterStep2() {
         ...values
       };
       
-      // Format the data for the API
-      const registerData = {
-        name: brandData.brandName,
-        email: brandData.companyEmail,
-        password: brandData.password,
-        description: '', // Optional field
-        website: brandData.websiteUrl,
-        logo: brandData.logoImage, // This might need to be processed if it's a File object
-        adminUsername: brandData.adminUsername,
-        category: brandData.category,
-        country: brandData.country,
-        phoneNumber: brandData.phone
-      };
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('name', brandData.brandName);
+      formData.append('email', brandData.companyEmail);
+      formData.append('password', brandData.password);
+      formData.append('description', ''); // Optional field
+      formData.append('website', brandData.websiteUrl);
+      formData.append('adminUsername', brandData.adminUsername);
+      formData.append('category', brandData.category);
+      formData.append('country', brandData.country);
+      formData.append('phoneNumber', brandData.phone);
       
-      // Handle logo image if it's a File object
-      if (registerData.logo instanceof File) {
-        const reader = new FileReader();
-        const logoPromise = new Promise((resolve) => {
-          reader.onload = () => {
-            resolve(reader.result);
-          };
-          reader.readAsDataURL(registerData.logo);
-        });
-        registerData.logo = await logoPromise;
+      // Add logo file if it exists
+      if (brandData.logoImage && brandData.logoImage instanceof File) {
+        formData.append('logoImage', brandData.logoImage);
       }
-        setRegistrationStatus('Connecting to server...');
       
-      // Call the backend API to register brand using the API service
-      const data = await authAPI.brandRegister(registerData);
+      setRegistrationStatus('Connecting to server...');
+      
+      // Call the backend API to register brand using FormData
+      const data = await authAPI.brandRegisterWithFormData(formData);
         if (!data.success) {
         throw new Error(data.message || 'Registration failed');
       }
@@ -139,8 +131,8 @@ function BrandRegisterStep2() {
         setTimeout(() => {
           navigate('/brand/verify-otp', { 
             state: { 
-              email: data.data?.email || registerData.email,
-              brandName: data.data?.brandName || registerData.name,
+              email: data.data?.email || brandData.companyEmail,
+              brandName: data.data?.brandName || brandData.brandName,
               message: data.message
             }
           });
@@ -153,7 +145,7 @@ function BrandRegisterStep2() {
           navigate('/brand/login', { 
             state: { 
               registrationSuccess: true,
-              email: data.data?.brand?.email || registerData.email
+              email: data.data?.brand?.email || brandData.companyEmail
             }
           });
         }, 1500);

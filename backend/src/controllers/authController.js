@@ -384,15 +384,34 @@ const getProfile = async (req, res) => {
 const brandRegister = async (req, res) => {
   try {
     console.log('🚀 Brand registration request received');
+    console.log('📋 Request method:', req.method);
+    console.log('📋 Request headers:', JSON.stringify(req.headers, null, 2));
+    console.log('📋 Request body exists:', req.body !== undefined);
+    console.log('📋 Request body type:', typeof req.body);
     console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
+    console.log('📋 Request file:', req.file ? {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      filename: req.file.filename,
+      path: req.file.path
+    } : 'No file uploaded');
     
+    // Check if req.body is undefined or null
+    if (!req.body) {
+      console.log('❌ Request body is undefined or null');
+      return res.status(400).json(
+        formatResponse(false, 'Request body is missing. Please ensure you are sending form data with proper Content-Type header.')
+      );
+    }
+
     const {
       name,
       email,
       password,
       description,
       website,
-      logo,
       adminUsername,
       adminEmail,
       category,
@@ -400,7 +419,15 @@ const brandRegister = async (req, res) => {
       phoneNumber
     } = req.body;
 
+    // Handle file upload (logo)
+    let logoPath = null;
+    if (req.file) {
+      logoPath = `/uploads/brands/${req.file.filename}`;
+      console.log('📷 Logo uploaded:', logoPath);
+    }
+
     // Validation
+
     if (!name || !email || !password || !adminUsername || !category || !country || !website) {
       console.log('❌ Validation failed - missing required fields');
       return res.status(400).json(
@@ -442,7 +469,8 @@ const brandRegister = async (req, res) => {
       description: description || '',
       category,
       country,
-      phoneNumber: phoneNumber || ''
+      phoneNumber: phoneNumber || '',
+      logo: logoPath // Add the uploaded logo path
     };
 
     // Generate and send OTP

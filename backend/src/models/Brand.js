@@ -9,10 +9,10 @@ const CREATE_BRANDS_TABLE = `
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     website VARCHAR(255),
+    logo VARCHAR(255),
     admin_username VARCHAR(100) NOT NULL,
     admin_email VARCHAR(255) NOT NULL,
     description TEXT,
-    logo_url VARCHAR(500),
     category VARCHAR(50) DEFAULT 'other',
     is_approved BOOLEAN DEFAULT FALSE,
     approved_at TIMESTAMP,
@@ -47,10 +47,10 @@ const Brand = {
         email,
         password,
         website,
+        logo,
         adminUsername,
         adminEmail,
         description,
-        logoUrl,
         category = 'other'
       } = brandData;
 
@@ -58,12 +58,12 @@ const Brand = {
       const hashedPassword = await bcrypt.hash(password, 12);
 
       const query = `
-        INSERT INTO brands (name, email, password, website, admin_username, admin_email, description, logo_url, category, is_approved)
+        INSERT INTO brands (name, email, password, website, logo, admin_username, admin_email, description, category, is_approved)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, name, email, website, admin_username, admin_email, description, logo_url, category, is_approved, created_at
+        RETURNING id, name, email, website, logo, admin_username, admin_email, description, category, is_approved, created_at
       `;
 
-      const values = [name, email, hashedPassword, website, adminUsername, adminEmail, description, logoUrl, category, false];
+      const values = [name, email, hashedPassword, website, logo, adminUsername, adminEmail, description, category, false];
       const result = await pool.query(query, values);
 
       console.log(`✅ Brand registered: ${name} (Category: ${category}, Pending approval)`);

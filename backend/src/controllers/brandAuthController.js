@@ -59,12 +59,6 @@ const register = async (req, res) => {
       );
     }
 
-    // Handle logo upload
-    let logoUrl = null;
-    if (req.file) {
-      logoUrl = `/uploads/brand-logos/${req.file.filename}`;
-    }
-
     // Create brand object
     const brandData = {
       name,
@@ -74,7 +68,6 @@ const register = async (req, res) => {
       website,
       adminUsername,
       adminEmail: email.toLowerCase(),
-      logoUrl,
       category
     };
 

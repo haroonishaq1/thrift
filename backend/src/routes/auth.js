@@ -1,5 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+
+// Multer storage config for logo uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../../uploads/brands'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'logo-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage });
 const {
   register,
   verifyOTP,
@@ -32,7 +46,8 @@ router.post('/verify-forgot-password-otp', asyncHandler(verifyForgotPasswordOTP)
 router.post('/reset-password', asyncHandler(resetPassword));
 
 // Brand routes (also available at /brand-auth/register via alias)
-router.post('/brand/register', asyncHandler(brandRegister));
+// Accept logoImage as a single file (field name from frontend FormData)
+router.post('/brand/register', upload.single('logoImage'), asyncHandler(brandRegister));
 
 // Protected routes
 router.get('/profile', authenticateToken, requireVerified, asyncHandler(getProfile));

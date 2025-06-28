@@ -128,6 +128,29 @@ export const authAPI = {
     });
   },
 
+  // Brand registration with FormData (for file uploads)
+  brandRegisterWithFormData: async (formData) => {
+    const url = `${API_BASE_URL}/brand-auth/register`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData, // Don't set Content-Type header, let browser set it with boundary
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  },
+
   // Brand OTP verification
   brandVerifyOTP: async (email, otpCode) => {
     return apiRequest('/brand-auth/verify-otp', {

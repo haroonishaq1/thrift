@@ -1,16 +1,30 @@
 const { pool } = require('./src/config/database');
 
-// Add logo column to brands table
 const addBrandLogoColumn = async () => {
   try {
-    console.log('🔧 Adding logo column to brands table...');
+    console.log('🔄 Adding logo column to brands table...');
+    
+    // Check if logo column already exists
+    const checkColumnQuery = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'brands' AND column_name = 'logo';
+    `;
+    
+    const columnExists = await pool.query(checkColumnQuery);
+    
+    if (columnExists.rows.length > 0) {
+      console.log('✅ Logo column already exists in brands table');
+      return;
+    }
     
     // Add logo column
-    await pool.query(`
+    const addColumnQuery = `
       ALTER TABLE brands 
-      ADD COLUMN IF NOT EXISTS logo_url VARCHAR(500)
-    `);
+      ADD COLUMN logo VARCHAR(255);
+    `;
     
+    await pool.query(addColumnQuery);
     console.log('✅ Logo column added to brands table successfully');
     
   } catch (error) {
@@ -19,16 +33,17 @@ const addBrandLogoColumn = async () => {
   }
 };
 
-// Main execution
-const main = async () => {
-  try {
-    await addBrandLogoColumn();
-    console.log('🎉 Logo migration completed successfully!');
-    process.exit(0);
-  } catch (error) {
-    console.error('💥 Logo migration failed:', error);
-    process.exit(1);
-  }
-};
+// Run the migration
+if (require.main === module) {
+  addBrandLogoColumn()
+    .then(() => {
+      console.log('✅ Migration completed successfully');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Migration failed:', error.message);
+      process.exit(1);
+    });
+}
 
-main();
+module.exports = { addBrandLogoColumn };
