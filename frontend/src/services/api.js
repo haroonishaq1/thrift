@@ -327,6 +327,11 @@ export const offersAPI = {
     return apiRequest(`/offers/category/${category}`, { method: 'GET' });
   },
 
+  // Get offers by brand ID
+  getOffersByBrandId: async (brandId) => {
+    return apiRequest(`/offers?brand_id=${brandId}`, { method: 'GET' });
+  },
+
   // Search offers
   searchOffers: async (searchTerm) => {
     const queryParams = new URLSearchParams({ q: searchTerm });
@@ -456,6 +461,13 @@ export const offersAPI = {
       headers: {
         'Authorization': `Bearer ${brandToken}`,
       },
+    });
+  },
+
+  // Get all brands (public)
+  getBrands: async () => {
+    return apiRequest('/offers/brands', {
+      method: 'GET',
     });
   },
 };

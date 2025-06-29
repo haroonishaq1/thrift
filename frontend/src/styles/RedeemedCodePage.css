@@ -37,41 +37,6 @@
   overflow: hidden;
 }
 
-/* Brand Logo Container - Above and outside the card */
-.brand-logo-container {
-  width: 140px;
-  height: 140px;
-  background: transparent;
-  border-radius: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 15px;
-  box-shadow: none;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.brand-logo {
-  max-width: 135px;
-  max-height: 135px;
-  width: 95%;
-  height: 95%;
-  object-fit: contain;
-  position: static;
-  display: block;
-  border-radius: 0;
-}
-
-/* Container for the main white card */
-.redeemed-container {
-  width: 100%;
-  max-width: 600px;
-  display: flex;
-  flex-direction: column;
-}
-
 /* Main white card */
 .redeemed-card {
   background: white;
@@ -239,21 +204,101 @@
   background: #3a56d4;
 }
 
+/* Brand Logo Styles for RedeemedCodePage */
+.offer-brand-logo-center {
+  width: 120px;
+  height: 120px;
+  border-radius: 0;
+  background-color: #ffffff !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 30px auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 4px solid #ffffff;
+  padding: 20px !important;
+  position: relative;
+  overflow: hidden;
+  /* Position above the card */
+  z-index: 10;
+}
+
+.offer-brand-logo-center::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff !important;
+  border-radius: 0;
+  z-index: 1;
+}
+
+.offer-brand-logo-center img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  position: relative;
+  z-index: 3;
+  border-radius: 0;
+  background-color: #ffffff !important;
+  padding: 10px !important;
+  /* Ensure white background behind logo */
+  box-shadow: 0 0 0 10px #ffffff !important;
+}
+
+/* Container for the main white card */
+.redeemed-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Main white card */
+.redeemed-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  padding: 50px 40px;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  /* Add top margin to account for logo spacing */
+  margin-top: 0;
+}
+
+/* Responsive styles for brand logo */
+@media (max-width: 768px) {
+  .offer-brand-logo-center {
+    width: 100px;
+    height: 100px;
+    padding: 15px !important;
+    margin-bottom: 20px;
+    border-radius: 0;
+  }
+
+  .offer-brand-logo-center::before {
+    border-radius: 0;
+  }
+
+  .offer-brand-logo-center img {
+    width: 70px;
+    height: 70px;
+    padding: 8px !important;
+    box-shadow: 0 0 0 8px #ffffff !important;
+    border-radius: 0;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .redeemed-main {
     padding: 20px 15px;
-  }
-  
-  .brand-logo-container {
-    width: 160px;
-    height: 100px;
-    margin-bottom: 30px;
-  }
-  
-  .brand-logo {
-    max-width: 120px;
-    max-height: 70px;
   }
   
   .redeemed-container {

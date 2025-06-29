@@ -14,6 +14,7 @@ function Home({ isLoggedIn }) {
   const [electronicsOffers, setElectronicsOffers] = useState([]);
   const [fashionOffers, setFashionOffers] = useState([]);
   const [featuredOffers, setFeaturedOffers] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -35,12 +36,19 @@ function Home({ isLoggedIn }) {
         const featuredResponse = await offersAPI.getFeaturedOffers(4);
         setFeaturedOffers(featuredResponse.data || []);
         
+        // Fetch brands
+        const brandsResponse = await offersAPI.getBrands();
+        console.log('Brands response:', brandsResponse);
+        setBrands(brandsResponse.data || []);
+        console.log('Brands set:', brandsResponse.data || []);
+        
       } catch (error) {
         console.error('Error fetching data:', error);
         // Set empty arrays as fallback
         setElectronicsOffers([]);
         setFashionOffers([]);
         setFeaturedOffers([]);
+        setBrands([]);
       } finally {
         setLoading(false);
       }
@@ -49,24 +57,43 @@ function Home({ isLoggedIn }) {
     fetchData();
   }, []);
 
+  // Set initial slide position when brands are loaded
+  useEffect(() => {
+    if (brands.length > 0) {
+      // For single brand, start at 0. For multiple brands, start at middle set
+      setCurrentSlide(brands.length === 1 ? 0 : brands.length);
+    }
+  }, [brands]);
+
   const nextSlide = () => {
+    // Don't advance if there's only one brand
+    if (brandCarouselItems.length <= 1) return;
+    
     setCurrentSlide((prev) => {
       const next = prev + 1;
       // Reset to middle set if we reach the end of extended items
-      if (next >= 15 - 5) { // 15 total items, reset before last 5
-        setTimeout(() => setCurrentSlide(5), 500);
-        return next;
+      const brandCount = brandCarouselItems.length;
+      if (brandCount > 0) {
+        const totalExtended = brandCount * 3;
+        if (next >= totalExtended - brandCount) {
+          setTimeout(() => setCurrentSlide(brandCount), 500);
+          return next;
+        }
       }
       return next;
     });
   };
 
   const prevSlide = () => {
+    // Don't go back if there's only one brand
+    if (brandCarouselItems.length <= 1) return;
+    
     setCurrentSlide((prev) => {
       const next = prev - 1;
       // Reset to middle set if we reach the beginning
-      if (next < 0) {
-        setTimeout(() => setCurrentSlide(9), 500); // 15 - 5 - 1
+      const brandCount = brandCarouselItems.length;
+      if (next < 0 && brandCount > 0) {
+        setTimeout(() => setCurrentSlide(brandCount * 2 - 1), 500);
         return next;
       }
       return next;
@@ -109,59 +136,115 @@ function Home({ isLoggedIn }) {
     navigate(`/offer/${dealId}`);
   };
 
-  const carouselItems = [
+  // Handle brand card click - navigate to offer page with first offer from that brand
+  const handleBrandClick = async (brandId, brandName) => {
+    try {
+      // Get offers for this brand
+      const response = await offersAPI.getOffersByBrandId(brandId);
+      const brandOffers = response.data || [];
+      
+      if (brandOffers.length > 0) {
+        // Navigate to the first offer of this brand
+        navigate(`/offer/${brandOffers[0].id}`);
+      } else {
+        // If no offers, navigate to any available offer
+        const allOffers = featuredOffers.concat(electronicsOffers, fashionOffers);
+        if (allOffers.length > 0) {
+          navigate(`/offer/${allOffers[0].id}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching brand offers:', error);
+      // Fallback to any available offer
+      const allOffers = featuredOffers.concat(electronicsOffers, fashionOffers);
+      if (allOffers.length > 0) {
+        navigate(`/offer/${allOffers[0].id}`);
+      }
+    }
+  };
+
+  // Create dynamic carousel items from brands data
+  const brandCarouselItems = brands.length > 0 ? brands.map((brand, index) => {
+    const suffixes = ['Exclusive', 'Collection', 'Special', 'Premium'];
+    const suffix = suffixes[index % suffixes.length];
+    
+    // Use carousel images as background and brand logo as overlay
+    const backgroundImages = [
+      '/images/carousel/apple-promo.jpg',
+      '/images/carousel/samsung-s25.jpg', 
+      '/images/carousel/sky-streaming.jpg',
+      '/images/carousel/wow-sport.jpg',
+      '/images/carousel/samsung.jpg'
+    ];
+    
+    console.log('Brand logo URL:', brand.logo ? `http://localhost:5000${brand.logo}` : 'No logo');
+    
+    return {
+      id: brand.id,
+      imageSrc: backgroundImages[index % backgroundImages.length], // Background image
+      title: `${brand.name} ${suffix}`,
+      description: `Up to 30% off on selected ${brand.name} items`,
+      brandName: brand.name,
+      logo: brand.logo ? `http://localhost:5000${brand.logo}` : null, // Brand logo for overlay
+      brandId: brand.id
+    };
+  }) : [
+    // Fallback mock data when no brands are available
     {
       id: 1,
       imageSrc: '/images/carousel/samsung-s25.jpg',
-      title: "The new Galaxy S25 Edge",
-      description: '📱 ✨ Pre-order now and secure benefits.*',
-      brandName: "SAMSUNG",
-      logo: '/images/logos/samsung.png',
+      title: "15% off all Apple products every month",
+      description: 'Achtung, neue Preise auf Apple-Geräte! 🍎',
+      brandName: "APPLE",
+      logo: '/images/logos/apple.png',
+      brandId: 1
     },
     {
       id: 2,
-      imageSrc: '/images/carousel/apple-promo.jpg',
-      title: '15% off all Apple products every month',
-      description: 'Achtung, neue Preise auf Apple-Geräte! 🍎',
-      brandName: 'GROVER',
-      logo: '/images/logos/grover.png',
-    },
-    {
-      id: 4,
       imageSrc: '/images/carousel/sky-streaming.jpg',
       title: 'Discover Sky Stream now!',
       description: 'Entertainment and sports streaming 🏆',
       brandName: 'SKY',
       logo: '/images/logos/sky.png',
+      brandId: 2
     },
     {
-      id: 5,
+      id: 3,
       imageSrc: '/images/levis.svg',
       title: "Levi's Exclusive",
       description: '20% student discount on all items',
       brandName: "LEVI'S",
       logo: '/images/logos/levis.png',
+      brandId: 3
     },
     {
-      id: 6,
+      id: 4,
       imageSrc: '/images/swarovski.svg',
       title: 'Swarovski Collection',
       description: 'Up to 30% off on selected items',
       brandName: 'SWAROVSKI',
       logo: '/images/logos/swarovski.png',
+      brandId: 4
     }
   ];
 
-  // Create seamless carousel by duplicating items
-  const extendedCarouselItems = [...carouselItems, ...carouselItems, ...carouselItems];
+  // Create seamless carousel by duplicating items (only if we have multiple brands)
+  const extendedCarouselItems = brandCarouselItems.length > 1 
+    ? [...brandCarouselItems, ...brandCarouselItems, ...brandCarouselItems]
+    : brandCarouselItems; // Don't duplicate if only one brand
 
-  // Auto-advance carousel
+  console.log('Brand carousel items count:', brandCarouselItems.length);
+  console.log('Extended carousel items count:', extendedCarouselItems.length);
+
+  // Auto-advance carousel (only if we have multiple brands)
   useEffect(() => {
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+    if (brandCarouselItems.length > 1) {
+      const timer = setInterval(() => {
+        nextSlide();
+      }, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [brandCarouselItems.length]);
 
   return (
     <div className="home">
@@ -174,35 +257,34 @@ function Home({ isLoggedIn }) {
           <div className="carousel-viewport">
             <div className="carousel-track" style={{ transform: `translateX(-${currentSlide * getTransformDistance()}px)` }}>
             {extendedCarouselItems.map((item, index) => (
-              <div key={`${item.id}-${index}`} className="carousel-card">
-                <div className="card-image">
-                  <img src={item.imageSrc} alt={item.title} />
-                </div>
-                <div className="card-overlay">
-                  <div className="card-content">
-                    <h3>{item.title}</h3>
-                    <p>{item.description}</p>
-                  </div>
-                </div>
+              <div 
+                key={`${item.id}-${index}`} 
+                className="carousel-card-wrapper"
+                onClick={() => handleBrandClick(item.brandId, item.brandName)}
+              >
+                <ProductCard
+                  id={item.id}
+                  brand={item.brandName}
+                  logo={item.logo}
+                  imageSrc={item.imageSrc}
+                  title={item.title}
+                  description={item.description}
+                  logoAlt={item.brandName}
+                />
               </div>
             ))}
           </div>
           </div>
-          <button className="nav-btn prev" onClick={prevSlide}>
-            <FaChevronLeft />
-          </button>
-          <button className="nav-btn next" onClick={nextSlide}>
-            <FaChevronRight />
-          </button>
-          <div className="carousel-indicators">
-            {carouselItems.map((_, index) => (
-              <button
-                key={index}
-                className={`indicator ${(currentSlide % 5) === index ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(5 + index)}
-              />
-            ))}
-          </div>
+          {brandCarouselItems.length > 1 && (
+            <>
+              <button className="nav-btn prev" onClick={prevSlide}>
+                <FaChevronLeft />
+              </button>
+              <button className="nav-btn next" onClick={nextSlide}>
+                <FaChevronRight />
+              </button>
+            </>
+          )}
         </div>
       </section>
 
@@ -210,14 +292,22 @@ function Home({ isLoggedIn }) {
       <section className="hot-deals">
         <div className="container">
           <div className="section-header">
-            <div className="header-content">
-              <FaFire className="fire-icon" />
-              <h2>Hot Deals</h2>
-              <p>Don't miss out on these amazing student discounts!</p>
+            <div className="section-title-row">
+              <div className="section-title-content">
+                <FaFire className="fire-icon" />
+                <h2>Hot Deals</h2>
+              </div>
+              <button className="show-more" onClick={() => {
+                // Navigate to first available offer to show OfferPage with all offers
+                const firstOffer = featuredOffers[0] || electronicsOffers[0] || fashionOffers[0];
+                if (firstOffer) {
+                  navigate(`/offer/${firstOffer.id}`);
+                }
+              }}>
+                Show more <span>→</span>
+              </button>
             </div>
-            <button className="show-more">
-              Show more <span>→</span>
-            </button>
+            <p>Don't miss out on these amazing student discounts!</p>
           </div>
           {loading ? (
             <div className="loading-spinner">Loading deals...</div>
@@ -251,7 +341,13 @@ function Home({ isLoggedIn }) {
             <div className="category-header">
               <div className="category-title-section">
                 <h3>Electronics & Technology</h3>
-                <button className="show-more" onClick={() => navigate('/category/electronics')}>
+                <button className="show-more" onClick={() => {
+                  // Navigate to first available offer to show OfferPage with all offers
+                  const firstOffer = electronicsOffers[0] || featuredOffers[0] || fashionOffers[0];
+                  if (firstOffer) {
+                    navigate(`/offer/${firstOffer.id}`);
+                  }
+                }}>
                   Show more <span>→</span>
                 </button>
               </div>
@@ -288,7 +384,13 @@ function Home({ isLoggedIn }) {
             <div className="category-header">
               <div className="category-title-section">
                 <h3>Fashion</h3>
-                <button className="show-more" onClick={() => navigate('/category/fashion')}>
+                <button className="show-more" onClick={() => {
+                  // Navigate to first available offer to show OfferPage with all offers
+                  const firstOffer = fashionOffers[0] || featuredOffers[0] || electronicsOffers[0];
+                  if (firstOffer) {
+                    navigate(`/offer/${firstOffer.id}`);
+                  }
+                }}>
                   Show more <span>→</span>
                 </button>
               </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/OfferPage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { getOfferById, getOffersByCategory } from '../services/offerData';
+import { offersAPI } from '../services/api';
 
 function OfferPage() {
   const { offerId } = useParams();
@@ -15,25 +15,89 @@ function OfferPage() {
   const [rating, setRating] = useState(null);
   const [showCodeScreen, setShowCodeScreen] = useState(false);
   
+  // Backend URL for constructing full image paths
+  const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  
   useEffect(() => {
-    try {
-      const data = getOfferById(offerId);
-      console.log('Current offer data:', data);
-      setOfferData(data);
-      
-      // Get all offers in the same category
-      const categoryData = getOffersByCategory(data.category);
-      console.log(`Offers in ${data.category} category:`, categoryData);
-      setCategoryOffers(categoryData);
-      
-      // Find the index of the current offer in the category list
-      const currentIndex = categoryData.findIndex(offer => offer.id === offerId);
-      console.log('Current offer index in category:', currentIndex);
-      setCurrentOfferIndex(currentIndex >= 0 ? currentIndex : 0);
-      
-    } catch (err) {
-      console.error('Error fetching offer:', err);
-      setError("Error fetching offer details. Please try again later.");
+    const fetchOfferData = async () => {
+      try {
+        console.log('Fetching offer with ID:', offerId);
+        
+        // Get the specific offer from the API
+        const offerResponse = await offersAPI.getOfferById(offerId);
+        console.log('Current offer data:', offerResponse);
+        
+        if (offerResponse.success && offerResponse.data) {
+          const offer = offerResponse.data;
+          setOfferData(offer);
+          
+          // Get all offers from the same brand (prioritize brand over category)
+          if (offer.brand_id) {
+            console.log('Fetching offers for brand_id:', offer.brand_id);
+            const brandResponse = await offersAPI.getOffersByBrandId(offer.brand_id);
+            console.log(`Offers from brand ${offer.brand_name}:`, brandResponse);
+            
+            if (brandResponse.success && brandResponse.data && brandResponse.data.length > 0) {
+              const brandData = brandResponse.data;
+              setCategoryOffers(brandData);
+              
+              // Find the index of the current offer in the brand list
+              const currentIndex = brandData.findIndex(brandOffer => brandOffer.id.toString() === offerId.toString());
+              console.log('Current offer index in brand:', currentIndex);
+              setCurrentOfferIndex(currentIndex >= 0 ? currentIndex : 0);
+            } else {
+              // Fallback to category offers if no brand offers found
+              console.log('No brand offers found, falling back to category');
+              if (offer.category) {
+                const categoryResponse = await offersAPI.getOffersByCategory(offer.category);
+                if (categoryResponse.success && categoryResponse.data) {
+                  setCategoryOffers(categoryResponse.data);
+                  const currentIndex = categoryResponse.data.findIndex(categoryOffer => categoryOffer.id.toString() === offerId.toString());
+                  setCurrentOfferIndex(currentIndex >= 0 ? currentIndex : 0);
+                } else {
+                  setCategoryOffers([offer]);
+                  setCurrentOfferIndex(0);
+                }
+              } else {
+                setCategoryOffers([offer]);
+                setCurrentOfferIndex(0);
+              }
+            }
+          } else if (offer.category) {
+            // Fallback to category-based offers if no brand_id
+            console.log('Fetching offers for category:', offer.category);
+            const categoryResponse = await offersAPI.getOffersByCategory(offer.category);
+            console.log(`Offers in ${offer.category} category:`, categoryResponse);
+            
+            if (categoryResponse.success && categoryResponse.data) {
+              const categoryData = categoryResponse.data;
+              setCategoryOffers(categoryData);
+              
+              // Find the index of the current offer in the category list
+              const currentIndex = categoryData.findIndex(categoryOffer => categoryOffer.id.toString() === offerId.toString());
+              console.log('Current offer index in category:', currentIndex);
+              setCurrentOfferIndex(currentIndex >= 0 ? currentIndex : 0);
+            } else {
+              // If no category offers found, just show this single offer
+              setCategoryOffers([offer]);
+              setCurrentOfferIndex(0);
+            }
+          } else {
+            // If no category, just show this single offer
+            setCategoryOffers([offer]);
+            setCurrentOfferIndex(0);
+          }
+        } else {
+          throw new Error(offerResponse.message || 'Failed to fetch offer');
+        }
+      } catch (err) {
+        console.error('Error fetching offer:', err);
+        setError(`Error fetching offer details: ${err.message}. Please try again later.`);
+      }
+    };
+
+    if (offerId) {
+      fetchOfferData();
     }
   }, [offerId]);
 
@@ -68,7 +132,7 @@ function OfferPage() {
   };
 
   const handlePrevOffer = () => {
-    if (categoryOffers.length > 0) {
+    if (categoryOffers.length > 1) {
       const newIndex = currentOfferIndex > 0 ? currentOfferIndex - 1 : categoryOffers.length - 1;
       setCurrentOfferIndex(newIndex);
       const newOfferId = categoryOffers[newIndex].id;
@@ -77,7 +141,7 @@ function OfferPage() {
   };
 
   const handleNextOffer = () => {
-    if (categoryOffers.length > 0) {
+    if (categoryOffers.length > 1) {
       const newIndex = currentOfferIndex < categoryOffers.length - 1 ? currentOfferIndex + 1 : 0;
       setCurrentOfferIndex(newIndex);
       const newOfferId = categoryOffers[newIndex].id;
@@ -86,7 +150,7 @@ function OfferPage() {
   };
 
   const handleIndicatorClick = (index) => {
-    if (categoryOffers.length > 0 && index >= 0 && index < categoryOffers.length) {
+    if (categoryOffers.length > 1 && index >= 0 && index < categoryOffers.length) {
       setCurrentOfferIndex(index);
       const newOfferId = categoryOffers[index].id;
       navigate(`/offer/${newOfferId}`);
@@ -126,7 +190,7 @@ function OfferPage() {
           // First Screen: Carousel-style offer display
           <>
             <div className="category-header">
-              <h1>{offerData.category || 'Fashion'}</h1>
+              <h1>{offerData.brand_name || 'Brand'}</h1>
               {categoryOffers.length > 1 && (
                 <p className="offer-counter">
                   {currentOfferIndex + 1} of {categoryOffers.length} offers
@@ -145,13 +209,19 @@ function OfferPage() {
                 <div className="offer-content-wrapper">
                   <div className="offer-brand-section">
                     <div className="offer-brand-logo-small">
-                      <img src={offerData.logo || "/images/logos/placeholder.png"} alt={offerData.brand} />
+                      <img 
+                        src={offerData.brand_logo ? `${BACKEND_URL}${offerData.brand_logo}` : "/images/logos/placeholder.svg"} 
+                        alt={offerData.brand_name}
+                        onError={(e) => {
+                          e.target.src = "/images/logos/placeholder.svg";
+                        }}
+                      />
                     </div>
-                    <h2 className="brand-name-large">{offerData.brand}</h2>
+                    <h2 className="brand-name-large">{offerData.brand_name}</h2>
                   </div>
                   <div className="offer-text-content">
                     <h3 className="offer-main-title">{offerData.title}</h3>
-                    <p className="offer-description-text">{offerData.discount}</p>
+                    <p className="offer-description-text">{offerData.description}</p>
                   </div>
                   <div className="offer-cta-section">
                     <button className="redeem-now-btn" onClick={handleRedeemNow}>
@@ -160,7 +230,13 @@ function OfferPage() {
                   </div>
                 </div>
                 <div className="offer-image-section">
-                  <img src={offerData.image || "/images/placeholder.jpg"} alt={offerData.title} />
+                  <img 
+                    src={offerData.image_url ? `${BACKEND_URL}${offerData.image_url}` : "/images/placeholder.jpg"} 
+                    alt={offerData.title}
+                    onError={(e) => {
+                      e.target.src = "/images/placeholder.jpg";
+                    }}
+                  />
                 </div>
               </div>
               <button 
@@ -176,10 +252,7 @@ function OfferPage() {
           // Second Screen: Rating and "Show code" - simplified layout
           <div className="redeem-screen">
             <div className="redeem-content">
-              <div className="offer-brand-logo-center">
-                <img src={offerData.logo || "/images/logos/placeholder.png"} alt={offerData.brand} />
-              </div>
-              <h1 className="discount-title">{offerData.discount}</h1>
+              <h1 className="discount-title">{offerData.description}</h1>
               <div className="offer-rating">
                 <p>Rate this offer:</p>
                 <div className="rating-buttons">
@@ -198,8 +271,8 @@ function OfferPage() {
                 </div>
               </div>
               <div className="offer-action">
-                <p>Enter this code at checkout to get {offerData.discount}.</p>
-                <p className="visit-website">Get your code now and visit the {offerData.brand} website.</p>
+                <p>Enter this code at checkout to get {offerData.description}.</p>
+                <p className="visit-website">Get your code now and visit the {offerData.brand_name} website.</p>
                 <button className="show-code-btn" onClick={handleShowCode}>
                   Show code
                 </button>

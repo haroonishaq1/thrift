@@ -166,6 +166,27 @@ router.get('/featured', async (req, res) => {
   }
 });
 
+// GET /api/offers/brands - Get all unique brands
+router.get('/brands', async (req, res) => {
+  try {
+    const { Brand } = require('../models/Brand');
+    const brands = await Brand.getAllBrands();
+
+    res.json({
+      success: true,
+      data: brands,
+      message: `Retrieved ${brands.length} brands`
+    });
+  } catch (error) {
+    console.error('Error fetching brands:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve brands',
+      error: error.message
+    });
+  }
+});
+
 // GET /api/offers/category/:category - Get offers by category
 router.get('/category/:category', async (req, res) => {
   try {

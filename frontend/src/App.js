@@ -5,7 +5,6 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import OtpVerification from './pages/OtpVerification';
 import Home from './pages/Home';
-import CategoryPage from './pages/CategoryPage';
 import BrandPage from './pages/BrandPage';
 import OfferPage from './pages/OfferPage';
 import RedeemedCodePage from './pages/RedeemedCodePage';
@@ -77,7 +76,6 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-otp" element={<OtpVerification updateAuthStatus={updateAuthStatus} />} />
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-          <Route path="/category/:category" element={<CategoryPage isLoggedIn={isLoggedIn} />} />
           <Route path="/brand/:brandName" element={<BrandPage isLoggedIn={isLoggedIn} />} />
           <Route path="/offer/:offerId" element={<OfferPage isLoggedIn={isLoggedIn} />} />
           <Route path="/redeem-code/:offerId" element={<RedeemedCodePage isLoggedIn={isLoggedIn} />} />

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import '../styles/RedeemedCodePage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { getOfferById } from '../services/offerData';
+import { offersAPI } from '../services/api';
 
 function RedeemedCodePage() {
   const { offerId } = useParams();
@@ -14,6 +14,9 @@ function RedeemedCodePage() {
   const [rating, setRating] = useState(null);
   const [copied, setCopied] = useState(false);
   const [userRating, setUserRating] = useState(null);
+
+  // Backend URL for constructing full image paths
+  const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   // Function to extract just the discount amount (e.g., "£150 off" from "£150 off + Free Galaxy Buds")
   const getDiscountAmount = (discountText) => {
@@ -33,15 +36,22 @@ function RedeemedCodePage() {
   };
 
   useEffect(() => {
-    const fetchOffer = () => {
+    const fetchOffer = async () => {
       try {
-        const offerData = getOfferById(offerId);
-        setOffer(offerData);
+        setLoading(true);
+        const offerResponse = await offersAPI.getOfferById(offerId);
         
-        // Generate a code with format: THRIFT-BRANDID-OFFER-ID-random6digits
-        const randomSixDigits = Math.floor(100000 + Math.random() * 900000);
-        const code = `THRIFT-${offerData.id}-${offerId}-${randomSixDigits}`;
-        setGeneratedCode(code);
+        if (offerResponse.success && offerResponse.data) {
+          const offerData = offerResponse.data;
+          setOffer(offerData);
+          
+          // Generate a code with format: THRIFT-BRANDID-OFFER-ID-random6digits
+          const randomSixDigits = Math.floor(100000 + Math.random() * 900000);
+          const code = `THRIFT-${offerData.id}-${offerId}-${randomSixDigits}`;
+          setGeneratedCode(code);
+        } else {
+          throw new Error(offerResponse.message || 'Failed to fetch offer');
+        }
         
         setLoading(false);
       } catch (error) {
@@ -50,7 +60,9 @@ function RedeemedCodePage() {
       }
     };
 
-    fetchOffer();
+    if (offerId) {
+      fetchOffer();
+    }
   }, [offerId]);
 
   const handleShowCode = () => {
@@ -102,15 +114,21 @@ function RedeemedCodePage() {
       <Header />
       
       <div className="redeemed-main">
-        {/* Brand Logo - Above and outside the card */}
-        <div className="brand-logo-container">
-          <img src={offer.logo || "/images/logos/placeholder.png"} alt={offer.brand} className="brand-logo" />
-        </div>
-        
         <div className="redeemed-container">
+          {/* Brand Logo - Outside the card */}
+          <div className="offer-brand-logo-center">
+            <img 
+              src={offer.brand_logo ? `${BACKEND_URL}${offer.brand_logo}` : "/images/logos/placeholder.svg"} 
+              alt={offer.brand_name}
+              onError={(e) => {
+                e.target.src = "/images/logos/placeholder.svg";
+              }}
+            />
+          </div>
+          
           <div className="redeemed-card">
             {/* Large Discount Text */}
-            <h1 className="discount-title">{getDiscountAmount(offer.discount)}</h1>
+            <h1 className="discount-title">{getDiscountAmount(offer.description)}</h1>
             
             {/* Rating Section */}
             <div className="rating-section">
@@ -151,12 +169,12 @@ function RedeemedCodePage() {
             
             {/* Instruction Text */}
             <p className="instruction-text">
-              Enter this code at checkout to get {getDiscountAmount(offer.discount)}.
+              Enter this code at checkout to get {getDiscountAmount(offer.description)}.
             </p>
             
             {/* Additional Text */}
             <p className="additional-text">
-              Get your code now and visit the {offer.brand} website.
+              Get your code now and visit the {offer.brand_name} website.
             </p>
             
             {/* Show Code Button */}

@@ -155,7 +155,7 @@ const Brand = {
   getAllBrands: async () => {
     try {
       const query = `
-        SELECT id, name, email, website, admin_username, admin_email, description, 
+        SELECT id, name, email, website, logo, admin_username, admin_email, description, 
                is_approved, approved_at, approved_by, approval_reason,
                rejected_at, rejected_by, rejection_reason, created_at,
                CASE 
